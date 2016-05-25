@@ -1,0 +1,49 @@
+// vim: ft=asciidoc
+
+= openshift-tools repository
+:toc: macro
+:toc-title:
+
+toc::[]
+
+
+== Description
+
+This repository contains an ansible module for modifying yaml files.
+
+I didn't see a good method of editing yaml files and config managing them through ansible.  This is my attempt.
+
+== Directory Structure
+
+----
+yedit
+├── roles                Contains the ansible role for lib_yaml_editor
+├── test                 python unit tests for yedit
+----
+
+== Examples:
+
+Sometimes it is necesarry to config manage .yml files.
+----
+- hosts: localhost
+  gather_facts: no
+  roles: 
+  - roles/lib_yaml_editor
+  tasks:
+  - name: manage yaml files
+    yedit:
+      src: /tmp/test.yaml
+      key: a#b#c
+      value:
+        d:
+          e:
+            f:
+              this is a test
+
+  - name: get a specific value
+    yedit:
+      state: list
+      key: a#b#c#d#e#f
+    register: yeditout
+  - debug: var=yeditout
+----

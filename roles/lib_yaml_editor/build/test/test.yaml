@@ -1,0 +1,41 @@
+#!/usr/bin/ansible-playbook
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - yedit:
+      src: foo.yml
+      key: foo
+      value: barplus
+      state: present
+    register: output
+  - debug:
+      msg: "{{ output }}"
+
+  - yedit:
+      src: foo.yml
+      state: list
+      key: foo
+    register: output
+  - debug:
+      var: output
+
+  - yedit:
+      src: foo.yml
+      key: team
+      value: peter
+      update: True
+      index: 1
+    register: output
+  - debug:
+      var: output
+
+  - yedit:
+      src: foo.yml
+      key: team
+      value: peter
+      update: True
+      curr_value: tim
+    register: output
+  - debug:
+      var: output

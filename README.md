@@ -1,2 +1,0 @@
-# yedit
-Yaml editor
