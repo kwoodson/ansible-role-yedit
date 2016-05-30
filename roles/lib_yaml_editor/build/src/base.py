@@ -6,6 +6,7 @@ module for managing yaml files
 
 import os
 import re
+import copy
 
 import json
 import yaml
