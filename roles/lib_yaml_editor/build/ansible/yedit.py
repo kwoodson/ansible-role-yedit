@@ -25,7 +25,8 @@ def main():
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
             src=dict(default=None, required=True, type='str'),
-            content=dict(default=None, type='dict'),
+            content=dict(default=None),
+            content_type=dict(default='dict', choices=['dict', 'str']),
             key=dict(default=None, type='str'),
             value=dict(),
             update=dict(default=False, type='bool'),
@@ -33,13 +34,13 @@ def main():
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
         ),
-        mutually_exclusive=[["curr_value", "index"]],
+        mutually_exclusive=[["curr_value", "index"], ["content", "value"]],
 
         supports_check_mode=True,
     )
     state = module.params['state']
 
-    yamlfile = Yedit(module.params['src'], module.params['content'])
+    yamlfile = Yedit(module.params['src'])
 
     rval = yamlfile.load()
     if not rval and state != 'present':
@@ -51,15 +52,15 @@ def main():
             rval = yamlfile.get(module.params['key'])
         module.exit_json(changed=False, results=rval, state="list")
 
-    if state == 'absent':
+    elif state == 'absent':
         rval = yamlfile.delete(module.params['key'])
         module.exit_json(changed=rval[0], results=rval[1], state="absent")
 
-    if state == 'present':
+    elif state == 'present' and module.params['value']:
 
         value = module.params['value']
 
-        if rval:
+        if rval != None:
             if module.params['update']:
                 curr_value = get_curr_value(module.params['curr_value'], module.params['curr_value_format'])
                 rval = yamlfile.update(module.params['key'], value, index=module.params['index'], curr_value=curr_value)
@@ -70,12 +71,22 @@ def main():
                 yamlfile.write()
             module.exit_json(changed=rval[0], results=rval[1], state="present")
 
-        if not module.params['content']:
-            rval = yamlfile.put(module.params['key'], value)
-        else:
-            rval = yamlfile.load()
-        yamlfile.write()
+        rval = yamlfile.put(module.params['key'], value)
+        rval = yamlfile.write()
+        module.exit_json(changed=rval[0], results=rval[1], state="present")
 
+    elif state == 'present' and module.params['content'] != None:
+        content = None
+        if module.params['content_type'] == 'dict':
+            content = module.params['content']
+        elif module.params['content_type'] == 'str':
+            content = yaml.load(module.params['content'])
+
+        if yamlfile.yaml_dict == content:
+            module.exit_json(changed=False, results=yamlfile.yaml_dict, state="present")
+
+        yamlfile.yaml_dict = content
+        rval = yamlfile.write()
         module.exit_json(changed=rval[0], results=rval[1], state="present")
 
     module.exit_json(failed=True,

@@ -39,3 +39,37 @@
     register: output
   - debug:
       var: output
+
+  - name: test creation with content as dict
+    yedit:
+      src: noexistdict.yml
+      content:
+        a: test
+        b: test
+    register: output
+  - debug:
+      var: output
+
+  - name: test with content as str
+    yedit:
+      src: noexiststr.yml
+      content_type: str
+      content: |
+        a: test
+        b: test
+        c: test
+        d: test
+    register: output
+  - debug:
+      var: output
+
+  - yedit:
+      src: noexist1.yml
+      key: a
+      value:
+        a: test
+        b: test
+    register: output
+  - debug:
+      var: output
+

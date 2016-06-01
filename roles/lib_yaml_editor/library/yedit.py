@@ -86,43 +86,39 @@ class Yedit(object):
     def add_entry(data, key, item=None):
         ''' Get an item from a dictionary with key notation a.b.c
             d = {'a': {'b': 'c'}}}
-            key = a.b
+            key = a#b
             return c
         '''
         if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
             return None
 
-        curr_data = copy.deepcopy(data)
-
         key_indexes = re.findall(Yedit.re_key, key)
         for arr_ind, dict_key in key_indexes[:-1]:
             if dict_key:
-                if isinstance(curr_data, dict) and curr_data.has_key(dict_key) and curr_data[dict_key]:
-                    curr_data = curr_data[dict_key]
+                if isinstance(data, dict) and data.has_key(dict_key) and data[dict_key]:
+                    data = data[dict_key]
                     continue
 
-                elif not isinstance(curr_data, dict):
+                elif data and not isinstance(data, dict):
                     return None
 
-                curr_data[dict_key] = {}
-                curr_data = curr_data[dict_key]
+                data[dict_key] = {}
+                data = data[dict_key]
 
-            elif arr_ind and isinstance(curr_data, list) and int(arr_ind) <= len(curr_data) - 1:
-                curr_data = curr_data[int(arr_ind)]
+            elif arr_ind and isinstance(data, list) and int(arr_ind) <= len(data) - 1:
+                data = data[int(arr_ind)]
             else:
                 return None
 
         # process last index for add
         # expected list entry
-        if key_indexes[-1][0] and isinstance(curr_data, list) and int(key_indexes[-1][0]) <= len(curr_data) - 1:
-            curr_data[int(key_indexes[-1][0])] = item
+        if key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
+            data[int(key_indexes[-1][0])] = item
 
         # expected dict entry
-        elif key_indexes[-1][1] and isinstance(curr_data, dict):
-            curr_data[key_indexes[-1][1]] = item
+        elif key_indexes[-1][1] and isinstance(data, dict):
+            data[key_indexes[-1][1]] = item
 
-
-        data = curr_data
         return data
 
     @staticmethod
@@ -165,6 +161,8 @@ class Yedit(object):
             raise YeditException(err.message)
 
         os.rename(tmp_filename, self.filename)
+
+        return (True, self.yaml_dict)
 
     def read(self):
         ''' write to file '''
@@ -278,16 +276,16 @@ class Yedit(object):
                 except ValueError:
                     return (False, self.yaml_dict)
 
-                entry[ind] = value
-
             elif index:
-                entry[index] = value
+                ind = index
 
             else:
                 entry.append(value)
                 return (True, self.yaml_dict)
 
-            return (True, self.yaml_dict)
+            if ind and entry[ind] != value:
+                entry[ind] = value
+                return (True, self.yaml_dict)
 
         return (False, self.yaml_dict)
 
@@ -301,17 +299,22 @@ class Yedit(object):
         if entry == value:
             return (False, self.yaml_dict)
 
-        result = Yedit.add_entry(self.yaml_dict, path, value)
+        tmp_copy = copy.deepcopy(self.yaml_dict)
+        result = Yedit.add_entry(tmp_copy, path, value)
         if not result:
             return (False, self.yaml_dict)
+
+        self.yaml_dict = tmp_copy
 
         return (True, self.yaml_dict)
 
     def create(self, path, value):
         ''' create a yaml file '''
         if not self.file_exists():
-            result = Yedit.add_entry(self.yaml_dict, path, value)
+            tmp_copy = copy.deepcopy(self.yaml_dict)
+            result = Yedit.add_entry(tmp_copy, path, value)
             if result:
+                self.yaml_dict = tmp_copy
                 return (True, self.yaml_dict)
 
         return (False, self.yaml_dict)
@@ -341,7 +344,8 @@ def main():
                        choices=['present', 'absent', 'list']),
             debug=dict(default=False, type='bool'),
             src=dict(default=None, required=True, type='str'),
-            content=dict(default=None, type='dict'),
+            content=dict(default=None),
+            content_type=dict(default='dict', choices=['dict', 'str']),
             key=dict(default=None, type='str'),
             value=dict(),
             update=dict(default=False, type='bool'),
@@ -349,13 +353,13 @@ def main():
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
         ),
-        mutually_exclusive=[["curr_value", "index"]],
+        mutually_exclusive=[["curr_value", "index"], ["content", "value"]],
 
         supports_check_mode=True,
     )
     state = module.params['state']
 
-    yamlfile = Yedit(module.params['src'], module.params['content'])
+    yamlfile = Yedit(module.params['src'])
 
     rval = yamlfile.load()
     if not rval and state != 'present':
@@ -367,15 +371,15 @@ def main():
             rval = yamlfile.get(module.params['key'])
         module.exit_json(changed=False, results=rval, state="list")
 
-    if state == 'absent':
+    elif state == 'absent':
         rval = yamlfile.delete(module.params['key'])
         module.exit_json(changed=rval[0], results=rval[1], state="absent")
 
-    if state == 'present':
+    elif state == 'present' and module.params['value']:
 
         value = module.params['value']
 
-        if rval:
+        if rval != None:
             if module.params['update']:
                 curr_value = get_curr_value(module.params['curr_value'], module.params['curr_value_format'])
                 rval = yamlfile.update(module.params['key'], value, index=module.params['index'], curr_value=curr_value)
@@ -386,12 +390,22 @@ def main():
                 yamlfile.write()
             module.exit_json(changed=rval[0], results=rval[1], state="present")
 
-        if not module.params['content']:
-            rval = yamlfile.put(module.params['key'], value)
-        else:
-            rval = yamlfile.load()
-        yamlfile.write()
+        rval = yamlfile.put(module.params['key'], value)
+        rval = yamlfile.write()
+        module.exit_json(changed=rval[0], results=rval[1], state="present")
 
+    elif state == 'present' and module.params['content'] != None:
+        content = None
+        if module.params['content_type'] == 'dict':
+            content = module.params['content']
+        elif module.params['content_type'] == 'str':
+            content = yaml.load(module.params['content'])
+
+        if yamlfile.yaml_dict == content:
+            module.exit_json(changed=False, results=yamlfile.yaml_dict, state="present")
+
+        yamlfile.yaml_dict = content
+        rval = yamlfile.write()
         module.exit_json(changed=rval[0], results=rval[1], state="present")
 
     module.exit_json(failed=True,
