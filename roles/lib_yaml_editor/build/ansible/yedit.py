@@ -30,11 +30,12 @@ def main():
             key=dict(default=None, type='str'),
             value=dict(),
             update=dict(default=False, type='bool'),
+            append=dict(default=False, type='bool'),
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
         ),
-        mutually_exclusive=[["curr_value", "index"], ["content", "value"]],
+        mutually_exclusive=[["curr_value", "index"], ["content", "value"], ['update', "append"]],
 
         supports_check_mode=True,
     )
@@ -50,6 +51,8 @@ def main():
     if state == 'list':
         if module.params['key']:
             rval = yamlfile.get(module.params['key'])
+        if rval == None:
+            rval = {}
         module.exit_json(changed=False, results=rval, state="list")
 
     elif state == 'absent':
@@ -64,6 +67,8 @@ def main():
             if module.params['update']:
                 curr_value = get_curr_value(module.params['curr_value'], module.params['curr_value_format'])
                 rval = yamlfile.update(module.params['key'], value, index=module.params['index'], curr_value=curr_value)
+            elif module.params['append']:
+                rval = yamlfile.append(module.params['key'], value)
             else:
                 rval = yamlfile.put(module.params['key'], value)
 

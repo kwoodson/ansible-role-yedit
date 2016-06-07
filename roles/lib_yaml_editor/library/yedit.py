@@ -57,6 +57,13 @@ class Yedit(object):
     @staticmethod
     def remove_entry(data, key):
         ''' remove data at location key '''
+        if key == '' and isinstance(data, dict):
+            data.clear()
+            return True
+        elif key == '' and isinstance(data, list):
+            del data[:]
+            return True
+
         if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
             return None
 
@@ -89,7 +96,9 @@ class Yedit(object):
             key = a#b
             return c
         '''
-        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+        if key == '':
+            pass
+        elif not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
             return None
 
         key_indexes = re.findall(Yedit.re_key, key)
@@ -128,7 +137,9 @@ class Yedit(object):
             key = a.b
             return c
         '''
-        if not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
+        if key == '':
+            pass
+        elif not (key and re.match(Yedit.re_valid_key, key) and isinstance(data, (list, dict))):
             return None
 
         key_indexes = re.findall(Yedit.re_key, key)
@@ -254,6 +265,20 @@ class Yedit(object):
 
         return entry == value
 
+    def append(self, path, value):
+        '''append value to a list'''
+        try:
+            entry = Yedit.get_entry(self.yaml_dict, path)
+        except KeyError as _:
+            entry = None
+
+        if entry == None or not isinstance(entry, list):
+            return (False, self.yaml_dict)
+
+        # pylint: disable=no-member,maybe-no-member
+        entry.append(value)
+        return (True, self.yaml_dict)
+
     def update(self, path, value, index=None, curr_value=None):
         ''' put path, value into a dict '''
         try:
@@ -262,15 +287,14 @@ class Yedit(object):
             entry = None
 
         if isinstance(entry, dict):
-            #pylint: disable=no-member,maybe-no-member
+            # pylint: disable=no-member,maybe-no-member
             entry.update(value)
             return (True, self.yaml_dict)
 
         elif isinstance(entry, list):
-            #pylint: disable=no-member,maybe-no-member
+            # pylint: disable=no-member,maybe-no-member
             ind = None
             if curr_value:
-                ind = None
                 try:
                     ind = entry.index(curr_value)
                 except ValueError:
@@ -279,14 +303,21 @@ class Yedit(object):
             elif index:
                 ind = index
 
-            else:
-                entry.append(value)
-                return (True, self.yaml_dict)
-
             if ind and entry[ind] != value:
                 entry[ind] = value
                 return (True, self.yaml_dict)
 
+            # see if it exists in the list
+            try:
+                ind = entry.index(value)
+            except ValueError:
+                # doesn't exist, append it
+                entry.append(value)
+                return (True, self.yaml_dict)
+
+            # already exists, return
+            if ind:
+                return (False, self.yaml_dict)
         return (False, self.yaml_dict)
 
     def put(self, path, value):
@@ -349,11 +380,12 @@ def main():
             key=dict(default=None, type='str'),
             value=dict(),
             update=dict(default=False, type='bool'),
+            append=dict(default=False, type='bool'),
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
         ),
-        mutually_exclusive=[["curr_value", "index"], ["content", "value"]],
+        mutually_exclusive=[["curr_value", "index"], ["content", "value"], ['update', "append"]],
 
         supports_check_mode=True,
     )
@@ -369,6 +401,8 @@ def main():
     if state == 'list':
         if module.params['key']:
             rval = yamlfile.get(module.params['key'])
+        if rval == None:
+            rval = {}
         module.exit_json(changed=False, results=rval, state="list")
 
     elif state == 'absent':
@@ -383,6 +417,8 @@ def main():
             if module.params['update']:
                 curr_value = get_curr_value(module.params['curr_value'], module.params['curr_value_format'])
                 rval = yamlfile.update(module.params['key'], value, index=module.params['index'], curr_value=curr_value)
+            elif module.params['append']:
+                rval = yamlfile.append(module.params['key'], value)
             else:
                 rval = yamlfile.put(module.params['key'], value)
 
