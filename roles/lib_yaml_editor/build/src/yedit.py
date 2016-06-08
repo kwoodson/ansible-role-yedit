@@ -9,11 +9,12 @@ class Yedit(object):
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z-./_]+)).?)+$"
     re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z-./_]+)"
 
-    def __init__(self, filename=None, content=None, content_type='yaml'):
+    def __init__(self, filename=None, content=None, content_type='yaml', backup=False):
         self.content = content
         self.filename = filename
         self.__yaml_dict = content
         self.content_type = content_type
+        self.backup = backup
         if self.filename and not self.content:
             if not self.load(content_type=self.content_type):
                 self.__yaml_dict = {}
@@ -133,8 +134,10 @@ class Yedit(object):
         if not self.filename:
             raise YeditException('Please specify a filename.')
 
+        if self.backup and self.file_exists():
+            shutil.copy(self.filename, self.filename + '.orig')
 
-        tmp_filename = self.filename + '.tmp'
+        tmp_filename = self.filename + '.yedit'
         try:
             with open(tmp_filename, 'w') as yfd:
                 yml_dump = yaml.safe_dump(self.yaml_dict, default_flow_style=False)
@@ -250,6 +253,7 @@ class Yedit(object):
         if entry == None or not isinstance(entry, list):
             return (False, self.yaml_dict)
 
+        # pylint: disable=no-member,maybe-no-member
         entry.append(value)
         return (True, self.yaml_dict)
 
@@ -261,12 +265,12 @@ class Yedit(object):
             entry = None
 
         if isinstance(entry, dict):
-            #pylint: disable=no-member,maybe-no-member
+            # pylint: disable=no-member,maybe-no-member
             entry.update(value)
             return (True, self.yaml_dict)
 
         elif isinstance(entry, list):
-            #pylint: disable=no-member,maybe-no-member
+            # pylint: disable=no-member,maybe-no-member
             ind = None
             if curr_value:
                 try:

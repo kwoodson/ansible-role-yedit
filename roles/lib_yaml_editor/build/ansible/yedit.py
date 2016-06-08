@@ -34,6 +34,7 @@ def main():
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
+            backup=dict(default=True, type='bool'),
         ),
         mutually_exclusive=[["curr_value", "index"], ["content", "value"], ['update', "append"]],
 
@@ -41,7 +42,7 @@ def main():
     )
     state = module.params['state']
 
-    yamlfile = Yedit(module.params['src'])
+    yamlfile = Yedit(module.params['src'], backup=module.params['backup'])
 
     rval = yamlfile.load()
     if not rval and state != 'present':

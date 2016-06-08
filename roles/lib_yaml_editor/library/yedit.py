@@ -34,11 +34,12 @@ class Yedit(object):
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z-./_]+)).?)+$"
     re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z-./_]+)"
 
-    def __init__(self, filename=None, content=None, content_type='yaml'):
+    def __init__(self, filename=None, content=None, content_type='yaml', backup=False):
         self.content = content
         self.filename = filename
         self.__yaml_dict = content
         self.content_type = content_type
+        self.backup = backup
         if self.filename and not self.content:
             if not self.load(content_type=self.content_type):
                 self.__yaml_dict = {}
@@ -158,8 +159,10 @@ class Yedit(object):
         if not self.filename:
             raise YeditException('Please specify a filename.')
 
+        if self.backup and self.file_exists():
+            shutil.copy(self.filename, self.filename + '.orig')
 
-        tmp_filename = self.filename + '.tmp'
+        tmp_filename = self.filename + '.yedit'
         try:
             with open(tmp_filename, 'w') as yfd:
                 yml_dump = yaml.safe_dump(self.yaml_dict, default_flow_style=False)
@@ -315,7 +318,7 @@ class Yedit(object):
                 entry.append(value)
                 return (True, self.yaml_dict)
 
-            # already exists, return
+            #already exists, return
             if ind:
                 return (False, self.yaml_dict)
         return (False, self.yaml_dict)
@@ -384,6 +387,7 @@ def main():
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
+            backup=dict(default=True, type='bool'),
         ),
         mutually_exclusive=[["curr_value", "index"], ["content", "value"], ['update', "append"]],
 
@@ -391,7 +395,7 @@ def main():
     )
     state = module.params['state']
 
-    yamlfile = Yedit(module.params['src'])
+    yamlfile = Yedit(module.params['src'], backup=module.params['backup'])
 
     rval = yamlfile.load()
     if not rval and state != 'present':
