@@ -2,7 +2,7 @@
 
 CUR_PATH=$(pwd)
 
-PREFIX_PYTHONPATH=$CUR_PATH/ansible/inventory/:$CUR_PATH/ansible/roles/lib_yaml_editor/library
+PREFIX_PYTHONPATH=$CUR_PATH/roles/lib_yaml_editor/library
 
 
 export PYTHONPATH=$PREFIX_PYTHONPATH:$PYTHONPATH

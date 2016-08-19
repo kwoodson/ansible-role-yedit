@@ -8,5 +8,5 @@ $ vim roles/lib_yaml_editor/library/yedit.py
 
 Then uncomment the if main section and comment out the bottom ansible import and the main() call.
 
-Then navigate to the test/units/ directory.
-$ python -m unittest yedit_tests
+Then execute the tests.
+$ ./test/units/yedit_test.py
