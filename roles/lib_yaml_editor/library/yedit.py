@@ -225,6 +225,37 @@ class Yedit(object):
 
         return entry
 
+    def pop(self, path, key_or_item):
+        ''' remove a key, value pair from a dict or an item for a list'''
+        try:
+            entry = Yedit.get_entry(self.yaml_dict, path)
+        except KeyError as _:
+            entry = None
+
+        if entry == None:
+            return  (False, self.yaml_dict)
+
+        if isinstance(entry, dict):
+            # pylint: disable=no-member,maybe-no-member
+            if entry.has_key(key_or_item):
+                entry.pop(key_or_item)
+                return (True, self.yaml_dict)
+            return (False, self.yaml_dict)
+
+        elif isinstance(entry, list):
+            # pylint: disable=no-member,maybe-no-member
+            ind = None
+            try:
+                ind = entry.index(key_or_item)
+            except ValueError:
+                return (False, self.yaml_dict)
+
+            entry.pop(ind)
+            return (True, self.yaml_dict)
+
+        return (False, self.yaml_dict)
+
+
     def delete(self, path):
         ''' remove path from a dict'''
         try:
@@ -291,6 +322,10 @@ class Yedit(object):
 
         if isinstance(entry, dict):
             # pylint: disable=no-member,maybe-no-member
+            if not isinstance(value, dict):
+                raise YeditException('Cannot replace key, value entry in dict with non-dict type.' \
+                                     ' value=[%s]  [%s]' % (value, type(value)))
+
             entry.update(value)
             return (True, self.yaml_dict)
 
@@ -303,10 +338,10 @@ class Yedit(object):
                 except ValueError:
                     return (False, self.yaml_dict)
 
-            elif index:
+            elif index != None:
                 ind = index
 
-            if ind and entry[ind] != value:
+            if ind != None and entry[ind] != value:
                 entry[ind] = value
                 return (True, self.yaml_dict)
 
@@ -319,7 +354,7 @@ class Yedit(object):
                 return (True, self.yaml_dict)
 
             #already exists, return
-            if ind:
+            if ind != None:
                 return (False, self.yaml_dict)
         return (False, self.yaml_dict)
 
@@ -355,7 +390,7 @@ class Yedit(object):
 
 def get_curr_value(invalue, val_type):
     '''return the current value'''
-    if not invalue:
+    if invalue == None:
         return None
 
     curr_value = None
@@ -365,6 +400,24 @@ def get_curr_value(invalue, val_type):
         curr_value = json.loads(invalue)
 
     return curr_value
+
+def parse_value(inc_value, vtype=''):
+    '''determine value type passed'''
+    true_bools = ['y', 'Y', 'yes', 'Yes', 'YES', 'true', 'True', 'TRUE', 'on', 'On', 'ON', ]
+    false_bools = ['n', 'N', 'no', 'No', 'NO', 'false', 'False', 'FALSE', 'off', 'Off', 'OFF']
+
+    # It came in as a string but you didn't specify value_type as string
+    # we will convert to bool if it matches any of the above cases
+    if isinstance(inc_value, str) and 'bool' in vtype:
+        if inc_value not in true_bools and inc_value not in false_bools:
+            raise YeditException('Not a boolean type. str=[%s] vtype=[%s]' % (inc_value, vtype))
+    if isinstance(inc_value, str) and 'str' not in vtype:
+        if inc_value in true_bools:
+            return True
+        elif inc_value in false_bools:
+            return False
+
+    return inc_value
 
 # pylint: disable=too-many-branches
 def main():
@@ -382,11 +435,12 @@ def main():
             content_type=dict(default='dict', choices=['dict', 'str']),
             key=dict(default=None, type='str'),
             value=dict(),
+            value_type=dict(default='', type='str'),
             update=dict(default=False, type='bool'),
             append=dict(default=False, type='bool'),
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
-            curr_value_format=dict(default='yaml', choices=['yaml', 'json'], type='str'),
+            curr_value_format=dict(default='yaml', choices=['yaml', 'json', 'str'], type='str'),
             backup=dict(default=True, type='bool'),
         ),
         mutually_exclusive=[["curr_value", "index"], ["content", "value"], ['update', "append"]],
@@ -410,16 +464,24 @@ def main():
         module.exit_json(changed=False, results=rval, state="list")
 
     elif state == 'absent':
-        rval = yamlfile.delete(module.params['key'])
+        if module.params['update']:
+            rval = yamlfile.pop(module.params['key'], module.params['value'])
+        else:
+            rval = yamlfile.delete(module.params['key'])
+
+        if rval[0]:
+            yamlfile.write()
+
         module.exit_json(changed=rval[0], results=rval[1], state="absent")
 
-    elif state == 'present' and module.params['value']:
+    elif state == 'present' and module.params['value'] != None:
 
-        value = module.params['value']
+        value = parse_value(module.params['value'], module.params['value_type'])
 
         if rval != None:
             if module.params['update']:
-                curr_value = get_curr_value(module.params['curr_value'], module.params['curr_value_format'])
+                curr_value = get_curr_value(parse_value(module.params['curr_value']),
+                                            module.params['curr_value_format'])
                 rval = yamlfile.update(module.params['key'], value, index=module.params['index'], curr_value=curr_value)
             elif module.params['append']:
                 rval = yamlfile.append(module.params['key'], value)
