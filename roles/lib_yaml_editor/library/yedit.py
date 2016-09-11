@@ -7,6 +7,129 @@
 #   | |) | (_) | | .` | (_) || |   | _|| |) | |  | |
 #   |___/ \___/  |_|\_|\___/ |_|   |___|___/___| |_|
 
+DOCUMENTATION='''
+---
+module: yedit
+short_description: Create, modify, and idempotently manage yaml files.
+description:
+  - Modify yaml files programmatically.
+options:
+  state:
+    description:
+    - State represents whether to create, modify, delete, or list yaml
+    required: true
+    default: present
+    choices: ["present", "absent", "list"]
+    aliases: []
+  debug:
+    description:
+    - Turn on debug information.
+    required: false
+    default: false
+    aliases: []
+  src:
+    description:
+    - The file that is the target of the modifications.
+    required: false
+    default: None
+    aliases: []
+  content:
+    description:
+    - Content represents the yaml content you desire to work with.  This could be the file contents to write or the inmemory data to modify.
+    required: false
+    default: None
+    aliases: []
+  content_type:
+    description:
+    - The python type of the content parameter.
+    reqiured: false
+    default: 'dict'
+    aliases: []
+  key:
+    description:
+    - The path to the value you wish to modify. Emtpy string means the top of the document.
+    reqiured: false
+    default: ''
+    aliases: []
+  value:
+    description:
+    - The incoming value of parameter 'key'.
+    reqiured: false
+    default:
+    aliases: []
+  value_type:
+    description:
+    - The python type of the incoming value.
+    reqiured: false
+    default: ''
+    aliases: []
+  update:
+    description:
+    - Whether the update should be performed on a dict/hash or list/array object.
+    reqiured: false
+    default: false
+    aliases: []
+  append:
+    description:
+    - Whether to append to an array/list.
+    reqiured: false
+    default: false
+    aliases: []
+  index:
+    description:
+    - Used in conjunction with the update parameter.  This will update a specific index in an array/list.
+    reqiured: false
+    default: false
+    aliases: []
+  curr_value:
+    description:
+    - Used in conjunction with the update parameter.  This is the current value of 'key' in the yaml file.
+    reqiured: false
+    default: false
+    aliases: []
+  curr_value_format:
+    description:
+    - Format of the incoming current value.
+    choices: ["yaml", "json", "str"]
+    reqiured: false
+    default: false
+    aliases: []
+  backup:
+    description:
+    - Whether to make a backup copy of the current file when performing an edit.
+    reqiured: false
+    default: true
+    aliases: []
+author:
+- "Kenny Woodson <kwoodson@redhat.com>"
+extends_documentation_fragment: []
+'''
+
+EXAMPLES = '''
+# Simple insert of key, value
+- name: insert simple key, value
+  yedit:
+    src: somefile.yml
+    key: test
+    value: somevalue
+    state: present
+# Results:
+# test: somevalue
+
+# Multilevel insert of key, value
+- name: insert simple key, value
+  yedit:
+    src: somefile.yml
+    key: a#b#c
+    value: d
+    state: present
+# Results:
+# a:
+#   b:
+#     c: d
+'''
+
+
 '''
 module for managing yaml files
 '''

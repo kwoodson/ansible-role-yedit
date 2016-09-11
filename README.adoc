@@ -42,6 +42,7 @@ Sometimes it is necesarry to config manage .yml files.
 
   - name: get a specific value
     yedit:
+      src: /tmp/test.yaml
       state: list
       key: a#b#c#d#e#f
     register: yeditout
