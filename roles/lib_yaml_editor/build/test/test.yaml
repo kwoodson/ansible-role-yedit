@@ -3,7 +3,8 @@
 - hosts: localhost
   gather_facts: no
   tasks:
-  - yedit:
+  - name: test barplus
+    yedit:
       src: foo.yml
       key: foo
       value: barplus
@@ -12,7 +13,8 @@
   - debug:
       msg: "{{ output }}"
 
-  - yedit:
+  - name: test state list
+    yedit:
       src: foo.yml
       state: list
       key: foo
@@ -20,7 +22,8 @@
   - debug:
       var: output
 
-  - yedit:
+  - name: test update index 1 peter
+    yedit:
       src: foo.yml
       key: team
       value: peter
@@ -30,7 +33,8 @@
   - debug:
       var: output
 
-  - yedit:
+  - name: test update curr_value tim with peter
+    yedit:
       src: foo.yml
       key: team
       value: peter
@@ -73,3 +77,15 @@
   - debug:
       var: output
 
+  - name: in memory content test
+    yedit:
+      content:
+        a: foo
+        b: bar
+      key: ''
+      value:
+        a: bar
+        b: foo
+    register: output
+  - debug:
+      var: output

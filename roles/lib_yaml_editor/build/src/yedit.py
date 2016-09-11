@@ -19,7 +19,6 @@ class Yedit(object):
             if not self.load(content_type=self.content_type):
                 self.__yaml_dict = {}
 
-
     @property
     def yaml_dict(self):
         ''' getter method for yaml_dict '''
@@ -95,9 +94,12 @@ class Yedit(object):
             else:
                 return None
 
+        if key == '':
+            data = item
+
         # process last index for add
         # expected list entry
-        if key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
+        elif key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:
             data[int(key_indexes[-1][0])] = item
 
         # expected dict entry
@@ -141,7 +143,7 @@ class Yedit(object):
         try:
             with open(tmp_filename, 'w') as yfd:
                 yml_dump = yaml.safe_dump(self.yaml_dict, default_flow_style=False)
-                for line in yml_dump.split('\n'):
+                for line in yml_dump.strip().split('\n'):
                     if '{{' in line and '}}' in line:
                         yfd.write(line.replace("'{{", '"{{').replace("}}'", '}}"') + '\n')
                     else:
@@ -185,9 +187,9 @@ class Yedit(object):
                 self.yaml_dict = yaml.load(contents)
             elif content_type == 'json':
                 self.yaml_dict = json.loads(contents)
-        except yaml.YAMLError as _:
+        except yaml.YAMLError as err:
             # Error loading yaml or json
-            return None
+            YeditException('Problem with loading yaml file. %s' % err)
 
         return self.yaml_dict
 
