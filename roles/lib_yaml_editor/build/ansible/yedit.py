@@ -103,11 +103,7 @@ def main():
     elif state == 'present':
         # check if content is different than what is in the file
         if module.params['content']:
-            content = None
-            if module.params['content_type'] == 'dict':
-                content = module.params['content']
-            elif module.params['content_type'] == 'str':
-                content = yaml.load(module.params['content'])
+            content = parse_value(module.params['content'], module.params['content_type'])
 
             # We had no edits to make and the contents are the same
             if yamlfile.yaml_dict == content and module.params['value'] == None:
