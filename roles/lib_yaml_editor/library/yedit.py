@@ -539,14 +539,8 @@ def parse_value(inc_value, vtype=''):
     elif isinstance(inc_value, bool) and 'str' in vtype:
         inc_value = str(inc_value)
 
+    # If vtype is not str then go ahead and attempt to yaml load it.
     if isinstance(inc_value, str) and 'str' not in vtype:
-        if inc_value in true_bools:
-            return True
-        elif inc_value in false_bools:
-            return False
-
-    # If type is unknown then go ahead and attempt to yaml load it.
-    if isinstance(inc_value, str):
         try:
             inc_value = yaml.load(inc_value)
         except Exception as _:
