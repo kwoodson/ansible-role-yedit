@@ -81,7 +81,7 @@ def main():
             rval = yamlfile.get(module.params['key'])
         if rval == None:
             rval = {}
-        module.exit_json(changed=False, results=rval, state="list")
+        module.exit_json(changed=False, result=rval, state="list")
 
     elif state == 'absent':
         if module.params['update']:
@@ -92,7 +92,7 @@ def main():
         if rval[0]:
             yamlfile.write()
 
-        module.exit_json(changed=rval[0], results=rval[1], state="absent")
+        module.exit_json(changed=rval[0], result=rval[1], state="absent")
 
     elif state == 'present':
         # check if content is different than what is in the file
@@ -101,7 +101,7 @@ def main():
 
             # We had no edits to make and the contents are the same
             if yamlfile.yaml_dict == content and module.params['value'] == None:
-                module.exit_json(changed=False, results=yamlfile.yaml_dict, state="present")
+                module.exit_json(changed=False, result=yamlfile.yaml_dict, state="present")
 
             yamlfile.yaml_dict = content
 
@@ -121,14 +121,14 @@ def main():
             if rval[0] and module.params['src']:
                 yamlfile.write()
 
-            module.exit_json(changed=rval[0], results=rval[1], state="present")
+            module.exit_json(changed=rval[0], result=rval[1], state="present")
 
         # no edits to make
         if module.params['src']:
             rval = yamlfile.write()
-            module.exit_json(changed=rval[0], results=rval[1], state="present")
+            module.exit_json(changed=rval[0], result=rval[1], state="present")
 
-        module.exit_json(changed=False, results=yamlfile.yaml_dict, state="present")
+        module.exit_json(changed=False, result=yamlfile.yaml_dict, state="present")
 
     module.exit_json(failed=True,
                      changed=False,
