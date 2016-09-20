@@ -34,62 +34,62 @@ options:
   content_type:
     description:
     - The python type of the content parameter.
-    reqiured: false
+    required: false
     default: 'dict'
     aliases: []
   key:
     description:
     - The path to the value you wish to modify. Emtpy string means the top of the document.
-    reqiured: false
+    required: false
     default: ''
     aliases: []
   value:
     description:
     - The incoming value of parameter 'key'.
-    reqiured: false
+    required: false
     default:
     aliases: []
   value_type:
     description:
     - The python type of the incoming value.
-    reqiured: false
+    required: false
     default: ''
     aliases: []
   update:
     description:
     - Whether the update should be performed on a dict/hash or list/array object.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   append:
     description:
     - Whether to append to an array/list.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   index:
     description:
     - Used in conjunction with the update parameter.  This will update a specific index in an array/list.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   curr_value:
     description:
     - Used in conjunction with the update parameter.  This is the current value of 'key' in the yaml file.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   curr_value_format:
     description:
     - Format of the incoming current value.
     choices: ["yaml", "json", "str"]
-    reqiured: false
+    required: false
     default: false
     aliases: []
   backup:
     description:
     - Whether to make a backup copy of the current file when performing an edit.
-    reqiured: false
+    required: false
     default: true
     aliases: []
 author:
