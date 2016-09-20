@@ -24,6 +24,7 @@ yedit
 == Examples:
 
 Sometimes it is necesarry to config manage .yml files.
+[source,yaml]
 ----
 - hosts: localhost
   gather_facts: no
