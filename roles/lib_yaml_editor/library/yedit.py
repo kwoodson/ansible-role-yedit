@@ -7,7 +7,7 @@
 #   | |) | (_) | | .` | (_) || |   | _|| |) | |  | |
 #   |___/ \___/  |_|\_|\___/ |_|   |___|___/___| |_|
 
-DOCUMENTATION='''
+DOCUMENTATION = '''
 ---
 module: yedit
 short_description: Create, modify, and idempotently manage yaml files.
@@ -42,62 +42,62 @@ options:
   content_type:
     description:
     - The python type of the content parameter.
-    reqiured: false
+    required: false
     default: 'dict'
     aliases: []
   key:
     description:
     - The path to the value you wish to modify. Emtpy string means the top of the document.
-    reqiured: false
+    required: false
     default: ''
     aliases: []
   value:
     description:
     - The incoming value of parameter 'key'.
-    reqiured: false
+    required: false
     default:
     aliases: []
   value_type:
     description:
     - The python type of the incoming value.
-    reqiured: false
+    required: false
     default: ''
     aliases: []
   update:
     description:
     - Whether the update should be performed on a dict/hash or list/array object.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   append:
     description:
     - Whether to append to an array/list.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   index:
     description:
     - Used in conjunction with the update parameter.  This will update a specific index in an array/list.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   curr_value:
     description:
     - Used in conjunction with the update parameter.  This is the current value of 'key' in the yaml file.
-    reqiured: false
+    required: false
     default: false
     aliases: []
   curr_value_format:
     description:
     - Format of the incoming current value.
     choices: ["yaml", "json", "str"]
-    reqiured: false
+    required: false
     default: false
     aliases: []
   backup:
     description:
     - Whether to make a backup copy of the current file when performing an edit.
-    reqiured: false
+    required: false
     default: true
     aliases: []
 author:
@@ -518,7 +518,7 @@ def get_curr_value(invalue, val_type):
     if invalue == None:
         return None
 
-    curr_value = None
+    curr_value = invalue
     if val_type == 'yaml':
         curr_value = yaml.load(invalue)
     elif val_type == 'json':
@@ -650,9 +650,6 @@ def main():
 
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
 # import module snippets.  This are required
-# IF RUNNING UNIT TESTS, COMMENT OUT THIS SECTION
-####
-from ansible.module_utils.basic import *
-
-main()
-####
+if __name__ == '__main__':
+    from ansible.module_utils.basic import *
+    main()

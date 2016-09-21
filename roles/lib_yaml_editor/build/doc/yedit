@@ -1,5 +1,6 @@
+# pylint: skip-file
 
-DOCUMENTATION='''
+DOCUMENTATION = '''
 ---
 module: yedit
 short_description: Create, modify, and idempotently manage yaml files.
