@@ -590,19 +590,28 @@ def main():
                                  ' file exists, that it is has correct permissions, and is valid yaml.')
 
     if state == 'list':
+        if module.params['content']:
+            content = parse_value(module.params['content'], module.params['content_type'])
+            yamlfile.yaml_dict = content
+
         if module.params['key']:
             rval = yamlfile.get(module.params['key'])
+
         if rval == None:
             rval = {}
         module.exit_json(changed=False, result=rval, state="list")
 
     elif state == 'absent':
+        if module.params['content']:
+            content = parse_value(module.params['content'], module.params['content_type'])
+            yamlfile.yaml_dict = content
+
         if module.params['update']:
             rval = yamlfile.pop(module.params['key'], module.params['value'])
         else:
             rval = yamlfile.delete(module.params['key'])
 
-        if rval[0]:
+        if rval[0] and module.params['src']:
             yamlfile.write()
 
         module.exit_json(changed=rval[0], result=rval[1], state="absent")
