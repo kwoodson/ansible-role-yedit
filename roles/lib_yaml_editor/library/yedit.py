@@ -100,6 +100,12 @@ options:
     required: false
     default: true
     aliases: []
+  lock:
+    description:
+    - Lock the file to support multiple concurrent same yaml file modifications
+    required: false
+    default: false
+    aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
 extends_documentation_fragment: []
@@ -137,6 +143,7 @@ module for managing yaml files
 import os
 import re
 import copy
+import fcntl
 
 import json
 import yaml
@@ -572,6 +579,7 @@ def main():
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json', 'str'], type='str'),
             backup=dict(default=True, type='bool'),
+            lock=dict(default=False, type='bool'),
         ),
         mutually_exclusive=[["curr_value", "index"], ['update', "append"]],
         required_one_of=[["content", "src"]],
@@ -581,6 +589,10 @@ def main():
     state = module.params['state']
 
     yamlfile = Yedit(filename=module.params['src'], backup=module.params['backup'])
+
+    if module.params['lock'] == True:
+        lock_file = open(yamlfile.filename + ".yedit_lock", "w")
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
 
     if module.params['src']:
         rval = yamlfile.load()
