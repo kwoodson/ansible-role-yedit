@@ -38,9 +38,7 @@ def parse_value(inc_value, vtype=''):
 
 # pylint: disable=too-many-branches
 def main():
-    '''
-    ansible oc module for secrets
-    '''
+    ''' ansible module for modifying yaml files'''
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -59,36 +57,34 @@ def main():
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json', 'str'], type='str'),
             backup=dict(default=True, type='bool'),
+            separator=dict(default='.', type='str'),
         ),
         mutually_exclusive=[["curr_value", "index"], ['update', "append"]],
         required_one_of=[["content", "src"]],
-
-        supports_check_mode=True,
     )
-    state = module.params['state']
-
-    yamlfile = Yedit(filename=module.params['src'], backup=module.params['backup'])
+    yamlfile = Yedit(filename=module.params['src'],
+                     backup=module.params['backup'],
+                     separator=module.params['separator'],
+                    )
 
     if module.params['src']:
         rval = yamlfile.load()
 
-        if yamlfile.yaml_dict == None and state != 'present':
+        if yamlfile.yaml_dict == None and module.params['state'] != 'present':
             module.fail_json(msg='Error opening file [%s].  Verify that the' + \
                                  ' file exists, that it is has correct permissions, and is valid yaml.')
 
-    if state == 'list':
+    if module.params['state'] == 'list':
         if module.params['content']:
             content = parse_value(module.params['content'], module.params['content_type'])
             yamlfile.yaml_dict = content
 
         if module.params['key']:
-            rval = yamlfile.get(module.params['key'])
+            rval = yamlfile.get(module.params['key']) or {}
 
-        if rval == None:
-            rval = {}
         module.exit_json(changed=False, result=rval, state="list")
 
-    elif state == 'absent':
+    elif module.params['state'] == 'absent':
         if module.params['content']:
             content = parse_value(module.params['content'], module.params['content_type'])
             yamlfile.yaml_dict = content
@@ -103,7 +99,7 @@ def main():
 
         module.exit_json(changed=rval[0], result=rval[1], state="absent")
 
-    elif state == 'present':
+    elif module.params['state'] == 'present':
         # check if content is different than what is in the file
         if module.params['content']:
             content = parse_value(module.params['content'], module.params['content_type'])
@@ -121,7 +117,7 @@ def main():
             if module.params['update']:
                 curr_value = get_curr_value(parse_value(module.params['curr_value']),
                                             module.params['curr_value_format'])
-                rval = yamlfile.update(key, value, index=module.params['index'], curr_value=curr_value)
+                rval = yamlfile.update(key, value, module.params['index'], curr_value)
             elif module.params['append']:
                 rval = yamlfile.append(key, value)
             else:
@@ -141,7 +137,7 @@ def main():
 
     module.exit_json(failed=True,
                      changed=False,
-                     results='Unknown state passed. %s' % state,
+                     results='Unknown state passed. %s' % module.params['state'],
                      state="unknown")
 
 # pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
