@@ -57,8 +57,7 @@
   - name: test with content as str
     yedit:
       src: noexiststr.yml
-      content_type: str
-      content: |
+      content:
         a: test
         b: test
         c: test

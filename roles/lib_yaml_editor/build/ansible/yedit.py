@@ -38,7 +38,7 @@ def parse_value(inc_value, vtype=''):
 
 # pylint: disable=too-many-branches
 def main():
-    ''' ansible module for modifying yaml files'''
+    ''' ansible oc module for secrets '''
 
     module = AnsibleModule(
         argument_spec=dict(
@@ -47,7 +47,7 @@ def main():
             debug=dict(default=False, type='bool'),
             src=dict(default=None, type='str'),
             content=dict(default=None),
-            content_type=dict(default='dict', choices=['dict', 'str']),
+            content_type=dict(default='dict', choices=['dict']),
             key=dict(default='', type='str'),
             value=dict(),
             value_type=dict(default='', type='str'),
