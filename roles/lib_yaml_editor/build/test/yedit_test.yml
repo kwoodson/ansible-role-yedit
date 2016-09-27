@@ -19,7 +19,7 @@
      dest: "./{{ test_file }}"
     changed_when: False
 
-###### add key to top level #####
+####### add key to top level #####
   - name: add a key at the top level
     yedit:
       src: "{{ test_file }}"
@@ -43,14 +43,16 @@
   - name: modify multilevel key, value
     yedit:
       src: "{{ test_file }}"
-      key: metadata#namespace
+      key: metadata-namespace
       value: openshift-is-awesome
+      separator: '-'
 
   - name: retrieve the inserted key
     yedit:
       src: "{{ test_file }}"
       state: list
-      key: metadata#namespace
+      key: metadata-namespace
+      separator: '-'
     register: results
 
   - name: Assert that key is as expected
@@ -63,7 +65,7 @@
   - name: test a string boolean
     yedit:
       src: "{{ test_file }}"
-      key: spec#containers[0]#volumeMounts[1]#readOnly
+      key: spec.containers[0].volumeMounts[1].readOnly
       value: 'true'
       value_type: str
 
@@ -71,7 +73,7 @@
     yedit:
       src: "{{ test_file }}"
       state: list
-      key: spec#containers[0]#volumeMounts[1]#readOnly
+      key: spec.containers[0].volumeMounts[1].readOnly
     register: results
 
   - name: Assert that key is a string
@@ -89,7 +91,7 @@
   - name: test array append
     yedit:
       src: "{{ test_file }}"
-      key: spec#containers[0]#command
+      key: spec.containers[0].command
       value: --my-new-parameter=openshift
       append: True
 
@@ -97,7 +99,7 @@
     yedit:
       src: "{{ test_file }}"
       state: list
-      key: spec#containers[0]#command
+      key: spec.containers[0].command
     register: results
 
   - name: Assert that the last element in array is our value
@@ -110,7 +112,7 @@
   - name: test array update modify
     yedit:
       src: "{{ test_file }}"
-      key: spec#containers[0]#command
+      key: spec.containers[0].command
       value: --root-ca-file=/etc/k8s/ssl/my.pem
       curr_value: --root-ca-file=/etc/kubernetes/ssl/ca.pem
       curr_value_format: str
@@ -120,7 +122,7 @@
     yedit:
       src: "{{ test_file }}"
       state: list
-      key: spec#containers[0]#command
+      key: spec.containers[0].command
     register: results
 
   - name: Assert that the element in array is our value
@@ -133,14 +135,14 @@
   - name: test dict create
     yedit:
       src: "{{ test_file }}"
-      key: a#b#c
+      key: a.b.c
       value: d
 
   - name: retrieve the key
     yedit:
       src: "{{ test_file }}"
       state: list
-      key: a#b#c
+      key: a.b.c
     register: results
 
   - name: Assert that the key was created
@@ -153,7 +155,7 @@
   - name: test create dict value
     yedit:
       src: "{{ test_file }}"
-      key: e#f#g
+      key: e.f.g
       value:
         h:
           i:
@@ -163,7 +165,7 @@
     yedit:
       src: "{{ test_file }}"
       state: list
-      key: e#f#g#h#i#j
+      key: e.f.g.h.i.j
     register: results
 
   - name: Assert that the key was created
@@ -176,7 +178,7 @@
   - name: test create list value
     yedit:
       src: "{{ test_file }}"
-      key: z#x#y
+      key: z.x.y
       value:
       - 1
       - 2
@@ -187,6 +189,7 @@
       src: "{{ test_file }}"
       state: list
       key: z#x#y
+      separator: '#'
     register: results
   - debug: var=results
 
