@@ -64,7 +64,7 @@ options:
     aliases: []
   append:
     description:
-    - Whether to append to an array/list.
+    - Whether to append to an array/list. When the key does not exist or is null, a new array is created. When the key is of a non-list type, nothing is done.
     required: false
     default: false
     aliases: []
