@@ -189,6 +189,15 @@ class YeditTest(unittest.TestCase):
         self.assertTrue(2 == yed.get('x:y:z').count([5, 6]))
         self.assertFalse(yed.exists('x:y:z', 4))
 
+    def test_append_twice_to_unique_list(self):
+        '''Testing append to list'''
+        yed = Yedit("yedit_test.yml", separator=':')
+        yed.put('x:y:z', [1, 2, 3])
+        yed.append('x:y:z', [5, 6], unique=True)
+        yed.append('x:y:z', [5, 6], unique=True)
+        self.assertTrue(yed.get('x:y:z') == [1, 2, 3, [5, 6]])
+        self.assertTrue(1 == yed.get('x:y:z').count([5, 6]))
+
     def test_add_item_to_dict(self):
         '''Testing update to dict'''
         yed = Yedit("yedit_test.yml", separator=':')

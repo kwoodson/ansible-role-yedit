@@ -68,6 +68,12 @@ options:
     required: false
     default: false
     aliases: []
+  append_unique:
+    description:
+    - whether the items added by append, must not yet exist in the list. If it exists, nothing is appended.
+    required: false
+    default: false
+    aliases: []
   index:
     description:
     - Used in conjunction with the update parameter.  This will update a specific index in an array/list.

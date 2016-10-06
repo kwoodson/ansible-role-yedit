@@ -76,6 +76,12 @@ options:
     required: false
     default: false
     aliases: []
+  append_unique:
+    description:
+    - whether the items added by append, must not yet exist in the list. If it exists, nothing is appended.
+    required: false
+    default: false
+    aliases: []
   index:
     description:
     - Used in conjunction with the update parameter.  This will update a specific index in an array/list.
@@ -453,7 +459,7 @@ class Yedit(object):
 
         return entry == value
 
-    def append(self, path, value):
+    def append(self, path, value, unique=False):
         '''append value to a list'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
@@ -466,8 +472,10 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
-        # pylint: disable=no-member,maybe-no-member
-        entry.append(value)
+        if not unique or value not in entry:
+            # pylint: disable=no-member,maybe-no-member
+            entry.append(value)
+
         return (True, self.yaml_dict)
 
     # pylint: disable=too-many-arguments
@@ -599,6 +607,7 @@ def main():
             value_type=dict(default='', type='str'),
             update=dict(default=False, type='bool'),
             append=dict(default=False, type='bool'),
+            append_unique=dict(default=False, type='bool'),
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json', 'str'], type='str'),
@@ -665,7 +674,7 @@ def main():
                                             module.params['curr_value_format'])
                 rval = yamlfile.update(key, value, module.params['index'], curr_value)
             elif module.params['append']:
-                rval = yamlfile.append(key, value)
+                rval = yamlfile.append(key, value, module.params['append_unique'])
             else:
                 rval = yamlfile.put(key, value)
 

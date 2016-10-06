@@ -87,6 +87,28 @@
       msg: "Test: boolean str:  true != [{{ results.result }}]"
 ###### end test boolean string #####
 
+###### test array append_unique #####
+  - name: test array append
+    yedit:
+      src: "{{ test_file }}"
+      key: spec.containers[0].command
+      value: /hyperkube
+      append: True
+      append_unique: True
+
+  - name: retrieve the array
+    yedit:
+      src: "{{ test_file }}"
+      state: list
+      key: spec.containers[0].command
+    register: results
+
+  - name: Assert that the last element in array is our value
+    assert:
+      that: results.result|count == 6
+      msg: "Test: item was not added"
+###### end test array append_unique #####
+
 ###### test array append #####
   - name: test array append
     yedit:

@@ -53,6 +53,7 @@ def main():
             value_type=dict(default='', type='str'),
             update=dict(default=False, type='bool'),
             append=dict(default=False, type='bool'),
+            append_unique=dict(default=False, type='bool'),
             index=dict(default=None, type='int'),
             curr_value=dict(default=None, type='str'),
             curr_value_format=dict(default='yaml', choices=['yaml', 'json', 'str'], type='str'),
@@ -119,7 +120,7 @@ def main():
                                             module.params['curr_value_format'])
                 rval = yamlfile.update(key, value, module.params['index'], curr_value)
             elif module.params['append']:
-                rval = yamlfile.append(key, value)
+                rval = yamlfile.append(key, value, module.params['append_unique'])
             else:
                 rval = yamlfile.put(key, value)
 
