@@ -108,6 +108,27 @@
       msg: "Test: '--my-new-parameter=openshift' != [{{ results.result[-1] }}]"
 ###### end test array append #####
 
+###### test non-existing array append #####
+  - name: test array append to non-existing key
+    yedit:
+      src: "{{ test_file }}"
+      key: nonexistingkey
+      value: --my-new-parameter=openshift
+      append: True
+
+  - name: retrieve the array
+    yedit:
+      src: "{{ test_file }}"
+      state: list
+      key: nonexistingkey
+    register: results
+
+  - name: Assert that the last element in array is our value
+    assert:
+      that: results.result[-1] == "--my-new-parameter=openshift"
+      msg: "Test: '--my-new-parameter=openshift' != [{{ results.result[-1] }}]"
+###### end test non-existing array append #####
+
 ###### test array update modify #####
   - name: test array update modify
     yedit:

@@ -72,7 +72,7 @@ options:
     aliases: []
   append:
     description:
-    - Whether to append to an array/list.
+    - Whether to append to an array/list. When the key does not exist or is null, a new array is created. When the key is of a non-list type, nothing is done.
     required: false
     default: false
     aliases: []
@@ -460,7 +460,10 @@ class Yedit(object):
         except KeyError as _:
             entry = None
 
-        if entry == None or not isinstance(entry, list):
+        if entry is None:
+            self.put(path, [])
+            entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
+        if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
         # pylint: disable=no-member,maybe-no-member

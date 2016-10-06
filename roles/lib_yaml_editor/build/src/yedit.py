@@ -311,7 +311,10 @@ class Yedit(object):
         except KeyError as _:
             entry = None
 
-        if entry == None or not isinstance(entry, list):
+        if entry is None:
+            self.put(path, [])
+            entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
+        if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
         # pylint: disable=no-member,maybe-no-member
