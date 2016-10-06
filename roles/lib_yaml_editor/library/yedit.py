@@ -167,9 +167,9 @@ class Yedit(object):
         self.__yaml_dict = content
         self.content_type = content_type
         self.backup = backup
-        if self.filename and not self.content:
-            if not self.load(content_type=self.content_type):
-                self.__yaml_dict = {}
+        self.load(content_type=self.content_type)
+        if self.__yaml_dict == None:
+            self.__yaml_dict = {}
 
     @property
     def separator(self):
@@ -333,9 +333,9 @@ class Yedit(object):
         return (True, self.yaml_dict)
 
     def read(self):
-        ''' write to file '''
+        ''' read from file '''
         # check if it exists
-        if not self.file_exists():
+        if self.filename == None or not self.file_exists():
             return None
 
         contents = None
@@ -355,14 +355,21 @@ class Yedit(object):
         ''' return yaml file '''
         contents = self.read()
 
-        if not contents:
+        if not contents and not self.content:
             return None
+
+        if self.content:
+            if isinstance(self.content, dict):
+                self.yaml_dict = self.content
+                return self.yaml_dict
+            elif isinstance(self.content, str):
+                contents = self.content
 
         # check if it is yaml
         try:
-            if content_type == 'yaml':
+            if content_type == 'yaml' and contents:
                 self.yaml_dict = yaml.load(contents)
-            elif content_type == 'json':
+            elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
             # Error loading yaml or json
