@@ -18,7 +18,7 @@ GEN_STR = "#!/usr/bin/env python\n"                                  + \
 
 OPENSHIFT_ANSIBLE_PATH = os.path.dirname(os.path.realpath(__file__))
 
-FILES = {'yedit.py':  ['doc/yedit', 'src/base.py', 'src/yedit.py', 'ansible/yedit.py'],
+FILES = {'yedit.py':  ['doc/license', 'doc/yedit', 'src/base.py', 'src/yedit.py', 'ansible/yedit.py'],
         }
 
 def main():
