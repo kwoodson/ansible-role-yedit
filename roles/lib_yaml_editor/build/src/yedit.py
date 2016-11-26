@@ -311,7 +311,7 @@ class Yedit(object):
 
         return entry == value
 
-    def append(self, path, value):
+    def append(self, path, value, unique=False):
         '''append value to a list'''
         try:
             entry = Yedit.get_entry(self.yaml_dict, path, self.separator)
@@ -324,8 +324,10 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
-        # pylint: disable=no-member,maybe-no-member
-        entry.append(value)
+        if not unique or value not in entry:
+            # pylint: disable=no-member,maybe-no-member
+            entry.append(value)
+
         return (True, self.yaml_dict)
 
     # pylint: disable=too-many-arguments
