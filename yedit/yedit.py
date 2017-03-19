@@ -54,7 +54,7 @@ class Yedit(object):
         self.content_type = content_type
         self.backup = backup
         self.load(content_type=self.content_type)
-        if self.__yaml_dict == None:
+        if self.__yaml_dict is None:
             self.__yaml_dict = {}
 
     @property
@@ -212,7 +212,7 @@ class Yedit(object):
                     else:
                         yfd.write(line + '\n')
         except Exception as err:
-            raise YeditException(err.message)
+            raise YeditException(err)
 
         os.rename(tmp_filename, self.filename)
 
@@ -221,7 +221,7 @@ class Yedit(object):
     def read(self):
         ''' read from file '''
         # check if it exists
-        if self.filename == None or not self.file_exists():
+        if self.filename is None or not self.file_exists():
             return None
 
         contents = None
@@ -279,7 +279,7 @@ class Yedit(object):
         except KeyError as _:
             entry = None
 
-        if entry == None:
+        if entry is None:
             return  (False, self.yaml_dict)
 
         if isinstance(entry, dict):
@@ -310,7 +310,7 @@ class Yedit(object):
         except KeyError as _:
             entry = None
 
-        if entry == None:
+        if entry is None:
             return  (False, self.yaml_dict)
 
         result = Yedit.remove_entry(self.yaml_dict, path, self.separator)

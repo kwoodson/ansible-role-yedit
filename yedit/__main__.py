@@ -15,6 +15,15 @@
 # limitations under the License.
 #
 
+
+import json
+import yaml
+# pylint: disable=relative-import
+from yedit import Yedit, YeditException
+# pylint: disable=unused-wildcard-import,wildcard-import,redefined-builtin
+from ansible.module_utils.basic import *
+
+
 DOCUMENTATION = '''
 ---
 module: yedit
@@ -138,15 +147,9 @@ EXAMPLES = '''
 '''
 
 
-from yedit import Yedit, YeditException
-import json
-import yaml
-from ansible.module_utils.basic import *
-
-
 def get_curr_value(invalue, val_type):
     '''return the current value'''
-    if invalue == None:
+    if invalue is None:
         return None
 
     curr_value = invalue
@@ -214,7 +217,7 @@ def main():
     if module.params['src']:
         rval = yamlfile.load()
 
-        if yamlfile.yaml_dict == None and module.params['state'] != 'present':
+        if yamlfile.yaml_dict is None and module.params['state'] != 'present':
             module.fail_json(msg='Error opening file [%s].  Verify that the' + \
                                  ' file exists, that it is has correct permissions, and is valid yaml.')
 
@@ -249,7 +252,7 @@ def main():
             content = parse_value(module.params['content'], module.params['content_type'])
 
             # We had no edits to make and the contents are the same
-            if yamlfile.yaml_dict == content and module.params['value'] == None:
+            if yamlfile.yaml_dict == content and module.params['value'] is None:
                 module.exit_json(changed=False, result=yamlfile.yaml_dict, state="present")
 
             yamlfile.yaml_dict = content
@@ -274,6 +277,7 @@ def main():
 
         # no edits to make
         if module.params['src']:
+            # pylint: disable=redefined-variable-type
             rval = yamlfile.write()
             module.exit_json(changed=rval[0], result=rval[1], state="present")
 
