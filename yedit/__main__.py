@@ -1,4 +1,148 @@
-#pylint: skip-file
+#
+# Copyright 2016 Red Hat, Inc. and/or its affiliates
+# and other contributors as indicated by the @author tags.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+DOCUMENTATION = '''
+---
+module: yedit
+short_description: Create, modify, and idempotently manage yaml files.
+description:
+  - Modify yaml files programmatically.
+options:
+  state:
+    description:
+    - State represents whether to create, modify, delete, or list yaml
+    required: true
+    default: present
+    choices: ["present", "absent", "list"]
+    aliases: []
+  debug:
+    description:
+    - Turn on debug information.
+    required: false
+    default: false
+    aliases: []
+  src:
+    description:
+    - The file that is the target of the modifications.
+    required: false
+    default: None
+    aliases: []
+  content:
+    description:
+    - Content represents the yaml content you desire to work with.  This could be the file contents to write or the inmemory data to modify.
+    required: false
+    default: None
+    aliases: []
+  content_type:
+    description:
+    - The python type of the content parameter.
+    required: false
+    default: 'dict'
+    aliases: []
+  key:
+    description:
+    - The path to the value you wish to modify. Emtpy string means the top of the document.
+    required: false
+    default: ''
+    aliases: []
+  value:
+    description:
+    - The incoming value of parameter 'key'.
+    required: false
+    default:
+    aliases: []
+  value_type:
+    description:
+    - The python type of the incoming value.
+    required: false
+    default: ''
+    aliases: []
+  update:
+    description:
+    - Whether the update should be performed on a dict/hash or list/array object.
+    required: false
+    default: false
+    aliases: []
+  append:
+    description:
+    - Whether to append to an array/list. When the key does not exist or is null, a new array is created. When the key is of a non-list type, nothing is done.
+    required: false
+    default: false
+    aliases: []
+  index:
+    description:
+    - Used in conjunction with the update parameter.  This will update a specific index in an array/list.
+    required: false
+    default: false
+    aliases: []
+  curr_value:
+    description:
+    - Used in conjunction with the update parameter.  This is the current value of 'key' in the yaml file.
+    required: false
+    default: false
+    aliases: []
+  curr_value_format:
+    description:
+    - Format of the incoming current value.
+    choices: ["yaml", "json", "str"]
+    required: false
+    default: false
+    aliases: []
+  backup:
+    description:
+    - Whether to make a backup copy of the current file when performing an edit.
+    required: false
+    default: true
+    aliases: []
+author:
+- "Kenny Woodson <kwoodson@redhat.com>"
+extends_documentation_fragment: []
+'''
+
+EXAMPLES = '''
+# Simple insert of key, value
+- name: insert simple key, value
+  yedit:
+    src: somefile.yml
+    key: test
+    value: somevalue
+    state: present
+# Results:
+# test: somevalue
+
+# Multilevel insert of key, value
+- name: insert simple key, value
+  yedit:
+    src: somefile.yml
+    key: a#b#c
+    value: d
+    state: present
+# Results:
+# a:
+#   b:
+#     c: d
+'''
+
+
+from yedit import Yedit, YeditException
+import json
+import yaml
+from ansible.module_utils.basic import *
+
 
 def get_curr_value(invalue, val_type):
     '''return the current value'''
@@ -140,8 +284,6 @@ def main():
                      results='Unknown state passed. %s' % module.params['state'],
                      state="unknown")
 
-# pylint: disable=redefined-builtin, unused-wildcard-import, wildcard-import, locally-disabled
-# import module snippets.  This are required
+
 if __name__ == '__main__':
-    from ansible.module_utils.basic import *
     main()
