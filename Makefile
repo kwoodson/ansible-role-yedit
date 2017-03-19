@@ -4,7 +4,10 @@ ANSIBLE_MODULE_FILE=library/yedit.py
 all: ansible test
 
 
-test: test-unit test-ansible
+test: test-style test-unit test-ansible
+
+test-style:
+	pylint yedit
 
 test-unit:
 	PYTHONPATH=. python test/units.py
