@@ -1,21 +1,19 @@
 #!/usr/bin/ansible-playbook
 # Yedit test so that we can quickly determine if features are working
 # Ensure that the kube-manager.yaml file exists
-#
-# ./yedit_test.yml -M ../../library
-#
+
 ---
 - hosts: localhost
   gather_facts: no
   vars:
-    test_file: kube-manager-test.yaml
+    test_file: data/kube-manager-test.yaml
     test: test
   strategy: debug
 
   post_tasks:
   - name: copy the kube-manager.yaml file so that we have a pristine copy each time
     copy:
-     src: kube-manager.yaml
+     src: data/kube-manager.yaml
      dest: "./{{ test_file }}"
     changed_when: False
 

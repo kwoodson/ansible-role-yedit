@@ -16,12 +16,37 @@ I didn't see a good method of editing yaml files and config managing them throug
 == Directory Structure
 
 ----
-yedit
-├── roles                Contains the ansible role for lib_yaml_editor
-├── test                 python unit tests for yedit
+yedit/
+├── yedit/
+│   ├── __init__.py
+│   ├── __main__.py      ansible module
+│   ├── yedit.py         the actual python code, which does the heavy lifting
+├── test/
+│   ├── ansible/         integration tests as ansible playbooks
+│   └── units.py         unit tests for the yedit class
+├── library/             target directory for ansible module
 ----
 
-== Examples:
+== Usage
+
+To use this module with ansible create the module file first:
+
+```
+$ make ansible
+$ file library/yedit.py
+library/yedit.py: Python script, ASCII text executable
+```
+
+The resulting file can be copied or symlinked into your project.
+
+== Development
+
+1. install dependencies: `pip install -r requirements.txt`
+2. make your changes in `yedit/*.py`
+3. run `make` to build and test your changes
+4. commit them and send us a PR :)
+
+== Examples
 
 Sometimes it is necesarry to config manage .yml files.
 [source,yaml]

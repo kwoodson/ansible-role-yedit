@@ -5,7 +5,7 @@
   tasks:
   - name: test barplus
     yedit:
-      src: foo.yml
+      src: data/foo.yml
       key: foo
       value: barplus
       state: present
@@ -15,7 +15,7 @@
 
   - name: test state list
     yedit:
-      src: foo.yml
+      src: data/foo.yml
       state: list
       key: foo
     register: output
@@ -24,7 +24,7 @@
 
   - name: test update index 1 peter
     yedit:
-      src: foo.yml
+      src: data/foo.yml
       key: team
       value: peter
       update: True
@@ -35,7 +35,7 @@
 
   - name: test update curr_value tim with peter
     yedit:
-      src: foo.yml
+      src: data/foo.yml
       key: team
       value: peter
       update: True
@@ -46,7 +46,7 @@
 
   - name: test creation with content as dict
     yedit:
-      src: noexistdict.yml
+      src: data/noexistdict.yml
       content:
         a: test
         b: test
@@ -56,7 +56,7 @@
 
   - name: test with content as str
     yedit:
-      src: noexiststr.yml
+      src: data/noexiststr.yml
       content:
         a: test
         b: test
@@ -67,7 +67,7 @@
       var: output
 
   - yedit:
-      src: noexist1.yml
+      src: data/noexist1.yml
       key: a
       value:
         a: test
