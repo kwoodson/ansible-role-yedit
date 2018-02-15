@@ -1,0 +1,5 @@
+include requirements.txt
+include README.adoc
+include setup.py
+graft roles
+graft test
