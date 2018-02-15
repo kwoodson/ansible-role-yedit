@@ -1,3 +1,4 @@
+# flake8: noqa
 # pylint: skip-file
 
 DOCUMENTATION = '''
@@ -28,7 +29,8 @@ options:
     aliases: []
   content:
     description:
-    - Content represents the yaml content you desire to work with.  This could be the file contents to write or the inmemory data to modify.
+    - Content represents the yaml content you desire to work with.  This
+    - could be the file contents to write or the inmemory data to modify.
     required: false
     default: None
     aliases: []
@@ -40,7 +42,8 @@ options:
     aliases: []
   key:
     description:
-    - The path to the value you wish to modify. Emtpy string means the top of the document.
+    - The path to the value you wish to modify. Emtpy string means the top of
+    - the document.
     required: false
     default: ''
     aliases: []
@@ -58,25 +61,30 @@ options:
     aliases: []
   update:
     description:
-    - Whether the update should be performed on a dict/hash or list/array object.
+    - Whether the update should be performed on a dict/hash or list/array
+    - object.
     required: false
     default: false
     aliases: []
   append:
     description:
-    - Whether to append to an array/list. When the key does not exist or is null, a new array is created. When the key is of a non-list type, nothing is done.
+    - Whether to append to an array/list. When the key does not exist or is
+    - null, a new array is created. When the key is of a non-list type,
+    - nothing is done.
     required: false
     default: false
     aliases: []
   index:
     description:
-    - Used in conjunction with the update parameter.  This will update a specific index in an array/list.
+    - Used in conjunction with the update parameter.  This will update a
+    - specific index in an array/list.
     required: false
     default: false
     aliases: []
   curr_value:
     description:
-    - Used in conjunction with the update parameter.  This is the current value of 'key' in the yaml file.
+    - Used in conjunction with the update parameter.  This is the current
+    - value of 'key' in the yaml file.
     required: false
     default: false
     aliases: []
@@ -89,9 +97,16 @@ options:
     aliases: []
   backup:
     description:
-    - Whether to make a backup copy of the current file when performing an edit.
+    - Whether to make a backup copy of the current file when performing an
+    - edit.
     required: false
     default: true
+    aliases: []
+  separator:
+    description:
+    - The separator being used when parsing strings.
+    required: false
+    default: '.'
     aliases: []
 author:
 - "Kenny Woodson <kwoodson@redhat.com>"
@@ -120,5 +135,20 @@ EXAMPLES = '''
 # a:
 #   b:
 #     c: d
+#
+# multiple edits at the same time
+- name: perform multiple edits
+  yedit:
+    src: somefile.yml
+    edits:
+    - key: a#b#c
+      value: d
+    - key: a#b#c#d
+      value: e
+    state: present
+# Results:
+# a:
+#   b:
+#     c:
+#       d: e
 '''
-
