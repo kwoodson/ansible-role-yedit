@@ -1,8 +1,9 @@
-#!/usr/bin/ansible-playbook
+#!/usr/bin/ansible-playbook --module-path=../../../library/
+#
 # Yedit test so that we can quickly determine if features are working
 # Ensure that the kube-manager.yaml file exists
 #
-# ./yedit_test.yml -M ../../library
+# ./yedit_test.yml
 #
 ---
 - hosts: localhost
@@ -15,11 +16,11 @@
   post_tasks:
   - name: copy the kube-manager.yaml file so that we have a pristine copy each time
     copy:
-     src: kube-manager.yaml
-     dest: "./{{ test_file }}"
+      src: kube-manager.yaml
+      dest: "./{{ test_file }}"
     changed_when: False
 
-####### add key to top level #####
+  ####### add key to top level #####
   - name: add a key at the top level
     yedit:
       src: "{{ test_file }}"
@@ -37,9 +38,9 @@
     assert:
       that: results.result == 'yedittest'
       msg: 'Test: add a key to top level failed.  yedittest != [{{ results.result }}]'
-###### end add key to top level #####
+  ###### end add key to top level #####
 
-###### modify multilevel key, value #####
+  ###### modify multilevel key, value #####
   - name: modify multilevel key, value
     yedit:
       src: "{{ test_file }}"
@@ -59,9 +60,9 @@
     assert:
       that: results.result == 'openshift-is-awesome'
       msg: 'Test: multilevel key, value modification:  openshift-is-awesome != [{{ results.result }}]'
-###### end modify multilevel key, value #####
+  ###### end modify multilevel key, value #####
 
-###### test a string boolean #####
+  ###### test a string boolean #####
   - name: test a string boolean
     yedit:
       src: "{{ test_file }}"
@@ -85,9 +86,9 @@
     assert:
       that: results.result != true
       msg: "Test: boolean str:  true != [{{ results.result }}]"
-###### end test boolean string #####
+  ###### end test boolean string #####
 
-###### test array append #####
+  ###### test array append #####
   - name: test array append
     yedit:
       src: "{{ test_file }}"
@@ -106,9 +107,9 @@
     assert:
       that: results.result[-1] == "--my-new-parameter=openshift"
       msg: "Test: '--my-new-parameter=openshift' != [{{ results.result[-1] }}]"
-###### end test array append #####
+  ###### end test array append #####
 
-###### test non-existing array append #####
+  ###### test non-existing array append #####
   - name: test array append to non-existing key
     yedit:
       src: "{{ test_file }}"
@@ -127,9 +128,9 @@
     assert:
       that: results.result[-1] == "--my-new-parameter=openshift"
       msg: "Test: '--my-new-parameter=openshift' != [{{ results.result[-1] }}]"
-###### end test non-existing array append #####
+  ###### end test non-existing array append #####
 
-###### test array update modify #####
+  ###### test array update modify #####
   - name: test array update modify
     yedit:
       src: "{{ test_file }}"
@@ -150,9 +151,9 @@
     assert:
       that: results.result[5] == "--root-ca-file=/etc/k8s/ssl/my.pem"
       msg: "Test: '--root-ca-file=/etc/k8s/ssl/my.pem' != [{{ results.result[5] }}]"
-###### end test array update modify#####
+  ###### end test array update modify#####
 
-###### test dict create #####
+  ###### test dict create #####
   - name: test dict create
     yedit:
       src: "{{ test_file }}"
@@ -170,9 +171,9 @@
     assert:
       that: results.result == "d"
       msg: "Test: 'd' != [{{ results.result }}]"
-###### end test dict create #####
+  ###### end test dict create #####
 
-###### test create dict value #####
+  ###### test create dict value #####
   - name: test create dict value
     yedit:
       src: "{{ test_file }}"
@@ -193,9 +194,9 @@
     assert:
       that: results.result == "k"
       msg: "Test: 'k' != [{{ results.result }}]"
-###### end test dict create #####
+  ###### end test dict create #####
 
-###### test create list value #####
+  ###### test create list value #####
   - name: test create list value
     yedit:
       src: "{{ test_file }}"
@@ -218,4 +219,33 @@
     assert:
       that: results.result == [1, 2, 3]
       msg: "Test: '[1, 2, 3]' != [{{ results.result }}]"
-###### end test create list value #####
+  ###### end test create list value #####
+
+  ###### test create multiple list value #####
+  - name: test multiple edits
+    yedit:
+      src: "{{ test_file }}"
+      edits:
+      - key: z.x.y
+        value:
+        - 1
+        - 2
+        - 3
+      - key: z.x.y
+        value: 4
+        action: append
+
+  - name: retrieve the key
+    yedit:
+      src: "{{ test_file }}"
+      state: list
+      key: z#x#y
+      separator: '#'
+    register: results
+  - debug: var=results
+
+  - name: Assert that the key was created
+    assert:
+      that: results.result == [1, 2, 3, 4]
+      msg: "Test: '[1, 2, 3, 4]' != [{{ results.result }}]"
+      ###### end test create multiple list value #####
