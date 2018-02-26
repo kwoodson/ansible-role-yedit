@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pip
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def extract_requirements(filename):
@@ -25,6 +25,6 @@ setup(
     license="TODO",
 
     install_requires=install_requires,
-    packages=['yedit'],
-    package_dir={'': 'roles/lib_yaml_editor/'}
+    package_dir={'': 'src'},
+    packages=find_packages('src')
 )
