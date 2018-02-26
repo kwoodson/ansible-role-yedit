@@ -13,11 +13,26 @@ This repository contains an ansible module for modifying yaml files.
 
 I didn't see a good method of editing yaml files and config managing them through ansible.  This is my attempt.
 
+== Install
+
+To install the library:
+
+----
+python setup.py install
+----
+
+To install the ansible module role:
+
+----
+python install_role --module-root=/where/you/keep/roles
+----
+
+
 == Directory Structure
 
 ----
 yedit
-├── roles                Contains the ansible role for lib_yaml_editor
+├── src                  Contains the code for use in ansible
 ├── test                 python unit tests for yedit
 ----
 
