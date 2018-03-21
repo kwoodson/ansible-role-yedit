@@ -1,5 +1,2 @@
 # VIM tmp files
 *.swp
-dist
-build
-*.egg-info
