@@ -31,6 +31,7 @@
 
 from __future__ import print_function  # noqa: F401
 import copy  # noqa: F401
+import datetime  # noqa: F401
 import json  # noqa: F401
 import os  # noqa: F401
 import re  # noqa: F401
@@ -150,6 +151,13 @@ options:
     required: false
     default: true
     aliases: []
+  suffix:
+    description:
+    - Append this string to the backup filename. You can use the result from a
+    - `now()` call as format template in the string, e.g. `'.{:%Y-%m-%dT%H%M}~'`.
+    required: false
+    default: '.orig'
+    aliases: []
   separator:
     description:
     - The separator being used when parsing strings.
@@ -224,13 +232,15 @@ class Yedit(object):
                  content=None,
                  content_type='yaml',
                  separator='.',
-                 backup=False):
+                 backup=False,
+                 suffix='.orig'):
         self.content = content
         self._separator = separator
         self.filename = filename
         self.__yaml_dict = content
         self.content_type = content_type
         self.backup = backup
+        self.suffix = suffix
         self.load(content_type=self.content_type)
         if self.__yaml_dict is None:
             self.__yaml_dict = {}
@@ -402,7 +412,8 @@ class Yedit(object):
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, self.filename + '.orig')
+            suffix = self.suffix.format(datetime.datetime.now())
+            shutil.copy(self.filename, self.filename + suffix)
 
         # Try to set format attributes if supported
         try:
