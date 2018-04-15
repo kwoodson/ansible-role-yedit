@@ -9,9 +9,9 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    test_file: kube-manager-test.yaml
+    test_file: files/kube-manager-test.yaml
     test: test
-  strategy: debug
+#strategy: debug
 
   post_tasks:
   - name: copy the kube-manager.yaml file so that we have a pristine copy each time
@@ -249,3 +249,77 @@
       that: results.result == [1, 2, 3, 4]
       msg: "Test: '[1, 2, 3, 4]' != [{{ results.result }}]"
       ###### end test create multiple list value #####
+
+  ###### test state absent on list item #####
+  - name: test state absent on a list item
+    yedit:
+      state: absent
+      content: ['oranges', 'apples']
+      value: apples
+    register: absentout
+
+  - debug: var=absentout
+  - assert:
+      that:
+      - absentout.result == ['oranges']
+      - absentout.result|length == 1
+
+  - name: test state absent on a list item
+    yedit:
+      state: absent
+      content: ['oranges', 'apples']
+      index: 1
+    register: absentout
+
+  - debug: var=absentout
+  - assert:
+      that:
+      - absentout.result == ['oranges']
+      - absentout.result|length == 1
+      ###### end test state absent on list item ####
+
+
+  ###### test backup ext on filename #####
+  - name: test state absent on a list item
+    yedit:
+      state: present
+      src: "{{ test_file }}"
+      key: test
+      value: "{{ lookup('pipe', 'date +%s') }}"
+
+    yedit:
+      state: present
+      src: files/kube-manager.yaml
+      key: test
+      backup: true
+      value: "{{ lookup('pipe', 'date +%s') }}"
+
+  - name: stat file
+    stat:
+      path: "{{ test_file }}.orig"
+    register: statout
+
+  - assert:
+      that:
+      - statout.stat.exists
+
+  - set_fact:
+      date_str: "{{ lookup('pipe', 'date +%s') }}"
+
+  - yedit:
+      state: present
+      src: "{{ test_file }}"
+      key: test
+      backup: true
+      backup_ext: ".{{ date_str }}"
+      value: "{{ lookup('pipe', 'date +%s') }}"
+
+  - name: stat file
+    stat:
+      path: "{{ test_file }}.{{ date_str }}"
+    register: statout
+
+  - assert:
+      that:
+      - statout.stat.exists
+      ###### end test state absent on list item ####
