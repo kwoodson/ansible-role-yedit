@@ -13,7 +13,8 @@ import mock
 # Disable import-error b/c our libraries aren't loaded in jenkins
 # pylint: disable=import-error
 # place yedit in our path
-yedit_path = os.path.join('/'.join(os.path.realpath(__file__).split('/')[:-4]), 'library')  # noqa: E501
+yedit_path = os.path.join(os.path.realpath('.'), '../../library')  # noqa: E501
+print yedit_path
 sys.path.insert(0, yedit_path)
 
 from yedit import Yedit, YeditException  # noqa: E402
@@ -323,6 +324,7 @@ class YeditTest(unittest.TestCase):
         params = {
             'src': None,
             'backup': False,
+            'backup_ext': '',
             'separator': '.',
             'state': 'present',
             'edits': [],
@@ -346,6 +348,7 @@ class YeditTest(unittest.TestCase):
         params = {
             'src': '/tmp/test',
             'backup': False,
+            'backup_ext': '',
             'separator': '.',
             'state': 'present',
             'edits': [],
