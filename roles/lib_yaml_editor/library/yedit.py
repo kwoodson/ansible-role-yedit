@@ -217,7 +217,7 @@ class YeditException(Exception):
     pass
 
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods,too-many-instance-attributes
 class Yedit(object):
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
@@ -230,7 +230,7 @@ class Yedit(object):
                  content=None,
                  content_type='yaml',
                  separator='.',
-                 backup_ext='.orig',
+                 backup_ext=".{}".format(time.strftime("%Y%m%dT%H%M%S")),
                  backup=False):
         self.content = content
         self._separator = separator
@@ -744,12 +744,7 @@ class Yedit(object):
 
         curr_value = invalue
         if val_type == 'yaml':
-            try:
-                # AUDIT:maybe-no-member makes sense due to different yaml libraries
-                # pylint: disable=maybe-no-member
-                curr_value = yaml.safe_load(invalue, Loader=yaml.RoundTripLoader)
-            except AttributeError:
-                curr_value = yaml.safe_load(invalue)
+            curr_value = yaml.safe_load(str(invalue))
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -941,8 +936,8 @@ def main():
             curr_value_format=dict(default='yaml',
                                    choices=['yaml', 'json', 'str'],
                                    type='str'),
-            backup=dict(default=True, type='bool'),
-            backup_ext=dict(default='.orig', type='str'),
+            backup=dict(default=False, type='bool'),
+            backup_ext=dict(default=".{}".format(time.strftime("%Y%m%dT%H%M%S")), type='str'),
             separator=dict(default='.', type='str'),
             edits=dict(default=None, type='list'),
         ),
