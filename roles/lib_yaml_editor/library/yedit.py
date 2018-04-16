@@ -614,6 +614,9 @@ class Yedit(object):
         if not isinstance(entry, list):
             return (False, self.yaml_dict)
 
+        if value in entry:
+            return (False, self.yaml_dict)
+
         # AUDIT:maybe-no-member makes sense due to loading data from
         # a serialized format.
         # pylint: disable=maybe-no-member
