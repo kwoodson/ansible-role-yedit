@@ -423,9 +423,21 @@ class Yedit(object):
         with open(tmp_filename, 'w') as yfd:
             fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
+            yfd.flush()  # flush internal buffers
+            os.fsync(yfd.fileno())  # ensure buffer content reached disk
             fcntl.flock(yfd, fcntl.LOCK_UN)
 
         os.rename(tmp_filename, filename)
+        # While the rename is atomic, we also need to ensure, that the updated
+        # directory entry has reached the disk too.
+        # NOTE: this might fail on Windows systems.
+        dfd = None
+        try:
+            dfd = os.open(os.path.dirname(filename), os.O_DIRECTORY)
+            os.fsync(dfd)
+        finally:
+            if dfd:
+                os.close(dfd)
 
     def write(self):
         ''' write to file '''
