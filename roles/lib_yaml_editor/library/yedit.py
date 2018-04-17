@@ -1,13 +1,4 @@
 #!/usr/bin/env python
-# pylint: disable=missing-docstring
-#     ___ ___ _  _ ___ ___    _ _____ ___ ___
-#    / __| __| \| | __| _ \  /_\_   _| __|   \
-#   | (_ | _|| .` | _||   / / _ \| | | _|| |) |
-#    \___|___|_|\_|___|_|_\/_/_\_\_|_|___|___/_ _____
-#   |   \ / _ \  | \| |/ _ \_   _| | __|   \_ _|_   _|
-#   | |) | (_) | | .` | (_) || |   | _|| |) | |  | |
-#   |___/ \___/  |_|\_|\___/ |_|   |___|___/___| |_|
-#
 # Copyright 2016 Red Hat, Inc. and/or its affiliates
 # and other contributors as indicated by the @author tags.
 #
@@ -23,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# -*- -*- -*- Begin included fragment: lib/import.py -*- -*- -*-
 
 # pylint: disable=wrong-import-order,wrong-import-position,unused-import
 
@@ -44,10 +33,6 @@ except ImportError:
     import yaml  # noqa: F401
 
 from ansible.module_utils.basic import AnsibleModule
-
-# -*- -*- -*- End included fragment: lib/import.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: doc/yedit -*- -*- -*-
 
 DOCUMENTATION = '''
 ---
@@ -206,10 +191,6 @@ EXAMPLES = '''
 #     c:
 #       d: e
 '''
-
-# -*- -*- -*- End included fragment: doc/yedit -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: class/yedit.py -*- -*- -*-
 
 
 class YeditException(Exception):
@@ -433,7 +414,7 @@ class Yedit(object):
         # NOTE: this might fail on Windows systems.
         dfd = None
         try:
-            dfd = os.open(os.path.dirname(filename), os.O_DIRECTORY)
+            dfd = os.open(os.path.join(os.path.realpath('.'),os.path.dirname(filename)), os.O_DIRECTORY)
             os.fsync(dfd)
         finally:
             if dfd:
@@ -921,10 +902,6 @@ class Yedit(object):
             return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
         return {'failed': True, 'msg': 'Unkown state passed'}
 
-# -*- -*- -*- End included fragment: class/yedit.py -*- -*- -*-
-
-# -*- -*- -*- Begin included fragment: ansible/yedit.py -*- -*- -*-
-
 
 # pylint: disable=too-many-branches
 def main():
@@ -987,5 +964,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# -*- -*- -*- End included fragment: ansible/yedit.py -*- -*- -*-

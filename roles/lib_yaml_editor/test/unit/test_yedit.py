@@ -14,7 +14,6 @@ import mock
 # pylint: disable=import-error
 # place yedit in our path
 yedit_path = os.path.join(os.path.realpath('.'), '../../library')  # noqa: E501
-print yedit_path
 sys.path.insert(0, yedit_path)
 
 from yedit import Yedit, YeditException  # noqa: E402
