@@ -9,9 +9,9 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    test_file: files/kube-manager-test.yaml
+    test_file: kube-manager-test.yaml
     test: test
-#strategy: debug
+# strategy: debug
 
   post_tasks:
   - name: copy the kube-manager.yaml file so that we have a pristine copy each time
@@ -280,16 +280,19 @@
 
 
   ###### test backup ext on filename #####
-  - name: test state absent on a list item
+  - name: test backup ext on file
     yedit:
       state: present
       src: "{{ test_file }}"
       key: test
+      backup: true
+      backup_ext: .orig
       value: "{{ lookup('pipe', 'date +%s') }}"
 
+  - name: second call which should be noop
     yedit:
       state: present
-      src: files/kube-manager.yaml
+      src: "{{ test_file }}"
       key: test
       backup: true
       value: "{{ lookup('pipe', 'date +%s') }}"
@@ -303,7 +306,8 @@
       that:
       - statout.stat.exists
 
-  - set_fact:
+  - name: set the date string for backup_ext
+    set_fact:
       date_str: "{{ lookup('pipe', 'date +%s') }}"
 
   - yedit:
@@ -311,12 +315,12 @@
       src: "{{ test_file }}"
       key: test
       backup: true
-      backup_ext: ".{{ date_str }}"
+      backup_ext: "{{ date_str }}"
       value: "{{ lookup('pipe', 'date +%s') }}"
 
   - name: stat file
     stat:
-      path: "{{ test_file }}.{{ date_str }}"
+      path: "{{ test_file }}{{ date_str }}"
     register: statout
 
   - assert:
