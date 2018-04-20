@@ -201,7 +201,7 @@ class YeditException(Exception):
 # pylint: disable=too-many-public-methods,too-many-instance-attributes
 class Yedit(object):
     ''' Class to modify yaml files '''
-    re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
+    re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z{0}/_-]+)).?)+$"
     re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z{0}/_-]+)"
     com_sep = set(['.', '#', '|', ':'])
 
