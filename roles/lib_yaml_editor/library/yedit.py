@@ -202,7 +202,7 @@ class YeditException(Exception):
 class Yedit(object):
     ''' Class to modify yaml files '''
     re_valid_key = r"(((\[-?\d+\])|([0-9a-zA-Z%s/_-]+)).?)+$"
-    re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z{}/_-]+)"
+    re_key = r"(?:\[(-?\d+)\])|([0-9a-zA-Z{0}/_-]+)"
     com_sep = set(['.', '#', '|', ':'])
 
     # pylint: disable=too-many-arguments
@@ -211,7 +211,7 @@ class Yedit(object):
                  content=None,
                  content_type='yaml',
                  separator='.',
-                 backup_ext=".{}".format(time.strftime("%Y%m%dT%H%M%S")),
+                 backup_ext=".{0}".format(time.strftime("%Y%m%dT%H%M%S")),
                  backup=False):
         self.content = content
         self._separator = separator
@@ -267,7 +267,7 @@ class Yedit(object):
             if value is not None:
                 data.pop(value)
             elif index is not None:
-                raise YeditException("remove_entry for a dictionary does not have an index {}".format(index))
+                raise YeditException("remove_entry for a dictionary does not have an index {0}".format(index))
             else:
                 data.clear()
 
@@ -339,7 +339,7 @@ class Yedit(object):
 
                 elif data and not isinstance(data, dict):
                     raise YeditException("Unexpected item type found while going through key " +
-                                         "path: {} (at key: {})".format(key, dict_key))
+                                         "path: {0} (at key: {1})".format(key, dict_key))
 
                 data[dict_key] = {}
                 data = data[dict_key]
@@ -348,7 +348,7 @@ class Yedit(object):
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
             else:
-                raise YeditException("Unexpected item type found while going through key path: {}".format(key))
+                raise YeditException("Unexpected item type found while going through key path: {0}".format(key))
 
         if key == '':
             data = item
@@ -366,7 +366,7 @@ class Yedit(object):
         # so we must have been provided some syntax like a.b.c[<int>] = "data" for a
         # non-existent array
         else:
-            raise YeditException("Error adding to object at path: {}".format(key))
+            raise YeditException("Error adding to object at path: {0}".format(key))
 
         return data
 
@@ -426,7 +426,7 @@ class Yedit(object):
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, '{}{}'.format(self.filename, self.backup_ext))
+            shutil.copy(self.filename, '{0}{1}'.format(self.filename, self.backup_ext))
 
         # Try to set format attributes if supported
         try:
@@ -443,7 +443,7 @@ class Yedit(object):
         elif self.content_type == 'json':
             Yedit._write(self.filename, json.dumps(self.yaml_dict, indent=4, sort_keys=True))
         else:
-            raise YeditException('Unsupported content_type: {}.'.format(self.content_type) +
+            raise YeditException('Unsupported content_type: {0}.'.format(self.content_type) +
                                  'Please specify a content_type of yaml or json.')
 
         return (True, self.yaml_dict)
@@ -506,7 +506,7 @@ class Yedit(object):
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. {}'.format(err))
+            raise YeditException('Problem with loading yaml file. {0}'.format(err))
 
         return self.yaml_dict
 
@@ -626,7 +626,7 @@ class Yedit(object):
             # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
                 raise YeditException('Cannot replace key, value entry in dict with non-dict type. ' +
-                                     'value=[{}] type=[{}]'.format(value, type(value)))
+                                     'value=[{0}] type=[{1}]'.format(value, type(value)))
 
             entry.update(value)
             return (True, self.yaml_dict)
@@ -755,7 +755,7 @@ class Yedit(object):
         # we will convert to bool if it matches any of the above cases
         if isinstance(inc_value, str) and 'bool' in vtype:
             if inc_value not in true_bools and inc_value not in false_bools:
-                raise YeditException('Not a boolean type. str=[{}] vtype=[{}]'.format(inc_value, vtype))
+                raise YeditException('Not a boolean type. str=[{0}] vtype=[{1}]'.format(inc_value, vtype))
         elif isinstance(inc_value, bool) and 'str' in vtype:
             inc_value = str(inc_value)
 
@@ -768,7 +768,7 @@ class Yedit(object):
                 inc_value = yaml.safe_load(inc_value)
             except Exception:
                 raise YeditException('Could not determine type of incoming value. ' +
-                                     'value=[{}] vtype=[{}]'.format(type(inc_value), vtype))
+                                     'value=[{0}] vtype=[{1}]'.format(type(inc_value), vtype))
 
         return inc_value
 
@@ -817,7 +817,7 @@ class Yedit(object):
 
             if yamlfile.yaml_dict is None and state != 'present':
                 return {'failed': True,
-                        'msg': 'Error opening file [{}].  Verify that the '.format(params['src']) +
+                        'msg': 'Error opening file [{0}].  Verify that the '.format(params['src']) +
                                'file exists, that it is has correct permissions, and is valid yaml.'}
 
         if state == 'list':
@@ -926,7 +926,7 @@ def main():
                                    choices=['yaml', 'json', 'str'],
                                    type='str'),
             backup=dict(default=False, type='bool'),
-            backup_ext=dict(default=".{}".format(time.strftime("%Y%m%dT%H%M%S")), type='str'),
+            backup_ext=dict(default=".{0}".format(time.strftime("%Y%m%dT%H%M%S")), type='str'),
             separator=dict(default='.', type='str'),
             edits=dict(default=None, type='list'),
         ),
