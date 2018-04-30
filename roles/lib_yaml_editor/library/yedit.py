@@ -1,42 +1,21 @@
-#!/usr/bin/env python
-# Copyright 2016 Red Hat, Inc. and/or its affiliates
-# and other contributors as indicated by the @author tags.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 # pylint: disable=wrong-import-order,wrong-import-position,unused-import
 
-from __future__ import print_function  # noqa: F401
-import copy  # noqa: F401
-import fcntl  # noqa: F401
-import json   # noqa: F401
-import os  # noqa: F401
-import re  # noqa: F401
-import shutil  # noqa: F401
-import tempfile  # noqa: F401
-import time  # noqa: F401
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
 
-try:
-    import ruamel.yaml as yaml  # noqa: F401
-except ImportError:
-    import yaml  # noqa: F401
-
-from ansible.module_utils.basic import AnsibleModule
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'core'}
 
 DOCUMENTATION = '''
 ---
 module: yedit
+version_added: "2.6"
 short_description: Create, modify, and idempotently manage yaml files.
 description:
   - Modify yaml files programmatically.
@@ -53,25 +32,25 @@ options:
     - Turn on debug information.
     required: false
     default: false
+    type: bool
     aliases: []
   src:
     description:
     - The file that is the target of the modifications.
     required: false
-    default: None
     aliases: []
   content:
     description:
     - Content represents the yaml content you desire to work with.  This
     - could be the file contents to write or the inmemory data to modify.
     required: false
-    default: None
     aliases: []
   content_type:
     description:
     - The python type of the content parameter.
     required: false
-    default: 'dict'
+    choices: ['yaml', 'json']
+    default: yaml
     aliases: []
   key:
     description:
@@ -86,6 +65,11 @@ options:
     required: false
     default:
     aliases: []
+  edits:
+    description:
+    - A list of edits to perform.  These follow the same format as a single edit
+    required: false
+    aliases: []
   value_type:
     description:
     - The python type of the incoming value.
@@ -99,6 +83,7 @@ options:
     required: false
     default: false
     aliases: []
+    type: bool
   append:
     description:
     - Whether to append to an array/list. When the key does not exist or is
@@ -107,40 +92,40 @@ options:
     required: false
     default: false
     aliases: []
+    type: bool
   index:
     description:
     - Used in conjunction with the update parameter.  This will update a
     - specific index in an array/list.
     required: false
-    default: false
     aliases: []
   curr_value:
     description:
     - Used in conjunction with the update parameter.  This is the current
     - value of 'key' in the yaml file.
     required: false
-    default: false
+    default: None
     aliases: []
   curr_value_format:
     description:
     - Format of the incoming current value.
     choices: ["yaml", "json", "str"]
     required: false
-    default: false
+    default: yaml
     aliases: []
   backup_ext:
     description:
     - The backup file's appended string.
     required: false
-    default: .orig
     aliases: []
   backup:
     description:
     - Whether to make a backup copy of the current file when performing an
     - edit.
     required: false
-    default: true
+    default: false
     aliases: []
+    type: bool
   separator:
     description:
     - The separator being used when parsing strings.
@@ -192,6 +177,21 @@ EXAMPLES = '''
 #       d: e
 '''
 
+import copy  # noqa: F401
+import fcntl  # noqa: F401
+import json   # noqa: F401
+import os  # noqa: F401
+import re  # noqa: F401
+import shutil  # noqa: F401
+import time  # noqa: F401
+
+try:
+    import ruamel.yaml as yaml  # noqa: F401
+except ImportError:
+    import yaml  # noqa: F401
+
+from ansible.module_utils.basic import AnsibleModule
+
 
 class YeditException(Exception):
     ''' Exception class for Yedit '''
@@ -211,7 +211,7 @@ class Yedit(object):
                  content=None,
                  content_type='yaml',
                  separator='.',
-                 backup_ext=".{}".format(time.strftime("%Y%m%dT%H%M%S")),
+                 backup_ext=".{0}".format(time.strftime("%Y%m%dT%H%M%S")),
                  backup=False):
         self.content = content
         self._separator = separator
@@ -267,7 +267,7 @@ class Yedit(object):
             if value is not None:
                 data.pop(value)
             elif index is not None:
-                raise YeditException("remove_entry for a dictionary does not have an index {}".format(index))
+                raise YeditException("remove_entry for a dictionary does not have an index {0}".format(index))
             else:
                 data.clear()
 
@@ -339,7 +339,7 @@ class Yedit(object):
 
                 elif data and not isinstance(data, dict):
                     raise YeditException("Unexpected item type found while going through key " +
-                                         "path: {} (at key: {})".format(key, dict_key))
+                                         "path: {0} (at key: {1})".format(key, dict_key))
 
                 data[dict_key] = {}
                 data = data[dict_key]
@@ -348,7 +348,7 @@ class Yedit(object):
                   int(arr_ind) <= len(data) - 1):
                 data = data[int(arr_ind)]
             else:
-                raise YeditException("Unexpected item type found while going through key path: {}".format(key))
+                raise YeditException("Unexpected item type found while going through key path: {0}".format(key))
 
         if key == '':
             data = item
@@ -366,7 +366,7 @@ class Yedit(object):
         # so we must have been provided some syntax like a.b.c[<int>] = "data" for a
         # non-existent array
         else:
-            raise YeditException("Error adding to object at path: {}".format(key))
+            raise YeditException("Error adding to object at path: {0}".format(key))
 
         return data
 
@@ -414,7 +414,7 @@ class Yedit(object):
         # NOTE: this might fail on Windows systems.
         dfd = None
         try:
-            dfd = os.open(os.path.join(os.path.realpath('.'),os.path.dirname(filename)), os.O_DIRECTORY)
+            dfd = os.open(os.path.join(os.path.realpath('.'), os.path.dirname(filename)), os.O_DIRECTORY)
             os.fsync(dfd)
         finally:
             if dfd:
@@ -426,7 +426,7 @@ class Yedit(object):
             raise YeditException('Please specify a filename.')
 
         if self.backup and self.file_exists():
-            shutil.copy(self.filename, '{}{}'.format(self.filename, self.backup_ext))
+            shutil.copy(self.filename, '{0}{1}'.format(self.filename, self.backup_ext))
 
         # Try to set format attributes if supported
         try:
@@ -443,7 +443,7 @@ class Yedit(object):
         elif self.content_type == 'json':
             Yedit._write(self.filename, json.dumps(self.yaml_dict, indent=4, sort_keys=True))
         else:
-            raise YeditException('Unsupported content_type: {}.'.format(self.content_type) +
+            raise YeditException('Unsupported content_type: {0}.'.format(self.content_type) +
                                  'Please specify a content_type of yaml or json.')
 
         return (True, self.yaml_dict)
@@ -506,7 +506,7 @@ class Yedit(object):
                 self.yaml_dict = json.loads(contents)
         except yaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. {}'.format(err))
+            raise YeditException('Problem with loading yaml file. {0}'.format(err))
 
         return self.yaml_dict
 
@@ -626,7 +626,7 @@ class Yedit(object):
             # pylint: disable=maybe-no-member
             if not isinstance(value, dict):
                 raise YeditException('Cannot replace key, value entry in dict with non-dict type. ' +
-                                     'value=[{}] type=[{}]'.format(value, type(value)))
+                                     'value=[{0}] type=[{1}]'.format(value, type(value)))
 
             entry.update(value)
             return (True, self.yaml_dict)
@@ -755,7 +755,7 @@ class Yedit(object):
         # we will convert to bool if it matches any of the above cases
         if isinstance(inc_value, str) and 'bool' in vtype:
             if inc_value not in true_bools and inc_value not in false_bools:
-                raise YeditException('Not a boolean type. str=[{}] vtype=[{}]'.format(inc_value, vtype))
+                raise YeditException('Not a boolean type. str=[{0}] vtype=[{1}]'.format(inc_value, vtype))
         elif isinstance(inc_value, bool) and 'str' in vtype:
             inc_value = str(inc_value)
 
@@ -768,7 +768,7 @@ class Yedit(object):
                 inc_value = yaml.safe_load(inc_value)
             except Exception:
                 raise YeditException('Could not determine type of incoming value. ' +
-                                     'value=[{}] vtype=[{}]'.format(type(inc_value), vtype))
+                                     'value=[{0}] vtype=[{1}]'.format(type(inc_value), vtype))
 
         return inc_value
 
@@ -817,7 +817,7 @@ class Yedit(object):
 
             if yamlfile.yaml_dict is None and state != 'present':
                 return {'failed': True,
-                        'msg': 'Error opening file [{}].  Verify that the '.format(params['src']) +
+                        'msg': 'Error opening file [{0}].  Verify that the '.format(params['src']) +
                                'file exists, that it is has correct permissions, and is valid yaml.'}
 
         if state == 'list':
@@ -892,7 +892,6 @@ class Yedit(object):
 
             # no edits to make
             if params['src']:
-                # pylint: disable=redefined-variable-type
                 rval = yamlfile.write()
                 return {'changed': rval[0],
                         'result': rval[1],
@@ -926,7 +925,7 @@ def main():
                                    choices=['yaml', 'json', 'str'],
                                    type='str'),
             backup=dict(default=False, type='bool'),
-            backup_ext=dict(default=".{}".format(time.strftime("%Y%m%dT%H%M%S")), type='str'),
+            backup_ext=dict(default=".{0}".format(time.strftime("%Y%m%dT%H%M%S")), type='str'),
             separator=dict(default='.', type='str'),
             edits=dict(default=None, type='list'),
         ),
@@ -953,13 +952,13 @@ def main():
                     break
 
         if key_error and edit_error:
-            module.fail_json(failed=True, msg='Empty value for parameter key not allowed.')
+            return module.fail_json(failed=True, msg='Empty value for parameter key not allowed.')
 
     rval = Yedit.run_ansible(module.params)
     if 'failed' in rval and rval['failed']:
-        module.fail_json(**rval)
+        return module.fail_json(**rval)
 
-    module.exit_json(**rval)
+    return module.exit_json(**rval)
 
 
 if __name__ == '__main__':
