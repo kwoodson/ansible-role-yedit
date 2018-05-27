@@ -6,20 +6,11 @@
 
 toc::[]
 
-
-== Description
+== Ansible Role: Yedit
 
 This repository contains an ansible module for modifying yaml files.
 
 I didn't see a good method of editing yaml files and config managing them through ansible.  This is my attempt.
-
-== Directory Structure
-
-----
-yedit
-├── roles                Contains the ansible role for lib_yaml_editor
-└── test                 python unit tests for yedit
-----
 
 == Install
 
