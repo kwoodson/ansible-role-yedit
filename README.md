@@ -70,7 +70,7 @@ Changing or adding value in an array/list
     yedit:
       src: /tmp/test.yaml
       state: list
-      key: a#b#c#d#e#f[0]
+      key: a#b#c[0]#d#e#f
     register: yeditout
   - debug: var=yeditout
 ----
