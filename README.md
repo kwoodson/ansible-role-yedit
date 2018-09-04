@@ -46,3 +46,33 @@ Sometimes it is necesarry to config manage .yml files.
     register: yeditout
   - debug: var=yeditout
 ----
+
+
+Changing or adding value in an array/list
+[source,yaml]
+----
+- hosts: localhost
+  gather_facts: no
+  roles: 
+  - roles/lib_yaml_editor
+  tasks:
+  - name: manage yaml files
+    yedit:
+      src: /tmp/test.yaml
+      key: a#b#c[0]
+      value:
+        d:
+          e:
+            f:
+              - this is a test
+
+  - name: get a specific value
+    yedit:
+      src: /tmp/test.yaml
+      state: list
+      key: a#b#c[0]#d#e#f
+    register: yeditout
+  - debug: var=yeditout
+----
+
+
