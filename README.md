@@ -15,8 +15,21 @@ I didn't see a good method of editing yaml files and config managing them throug
 == Install
 
 As `yedit` is not a listed Ansible module, have to install it manually by placing `lib_yaml_editor` directory in a location recognized by Ansible. For details, see http://docs.ansible.com/ansible/latest/index.html[Ansible documentation]:
+
 * http://docs.ansible.com/ansible/devel/playbooks_reuse_roles.html#embedding-modules-and-plugins-in-roles[Embedding Modules and Plugins In Roles]
 * http://docs.ansible.com/ansible/latest/intro_configuration.html#module-utils[module_utils]
+
+Alternatively you can install via Ansible Galaxy:
+
+    $ ansible-galaxy install kwoodson.yedit
+    
+If you do this, you should also add a `requirements.yml` so other users of your playbook know what dependencies to install:
+
+```yaml
+---
+- src: kwoodson.yedit
+```
+
 
 == Examples
 
