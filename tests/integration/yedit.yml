@@ -327,3 +327,21 @@
       that:
       - statout.stat.exists
       ###### end test state absent on list item ####
+
+  ###### test append to top level
+  - name: test append to top level
+    yedit:
+      src: files/playbook.yml
+      edits:
+      - key: "[1]"
+        value:
+          hosts: masters[1]
+          tasks:
+          - debug: msg=hello
+    register: addedpb
+
+  - debug: var=addedpb
+  - assert:
+      that:
+      - addedpb.result[0].edit[1].hosts  == "masters[1]"
+      ###### end test append to base list
