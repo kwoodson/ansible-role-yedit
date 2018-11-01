@@ -46,3 +46,7 @@ Sometimes it is necesarry to config manage .yml files.
     register: yeditout
   - debug: var=yeditout
 ----
+
+== Documentation
+
+Full documentation is available inline https://github.com/kwoodson/ansible-role-yedit/blob/master/library/yedit.py#L15[here].
