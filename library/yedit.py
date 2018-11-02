@@ -355,8 +355,12 @@ class Yedit(object):
 
         # process last index for add
         # expected list entry
-        elif key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data) - 1:  # noqa: E501
-            data[int(key_indexes[-1][0])] = item
+        elif key_indexes[-1][0] and isinstance(data, list) and int(key_indexes[-1][0]) <= len(data):  # noqa: E501
+            # key is next element in array so append
+            if int(key_indexes[-1][0]) > len(data)-1:
+                data.append(item)
+            else:
+                data[int(key_indexes[-1][0])] = item
 
         # expected dict entry
         elif key_indexes[-1][1] and isinstance(data, dict):

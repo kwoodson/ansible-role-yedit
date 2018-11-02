@@ -302,6 +302,13 @@ class YeditTest(unittest.TestCase):
         self.assertTrue(results)
         self.assertTrue(data, {'a': {'b': []}})
 
+    def test_append_base_list(self):
+        '''test removing list entry'''
+        content = [{'a': {'b': [{'c': 3}]}}]
+        yed = Yedit(content=content)
+        yed.put("[1]", [{"next": "something"}])
+        self.assertTrue(yed.yaml_dict, [{'a': {'b': [{'c': 3}]}}, {"next": "something"}])
+
     def test_parse_value_string_true(self):
         '''test parse_value'''
         results = Yedit.parse_value('true', 'str')
