@@ -152,7 +152,7 @@ EXAMPLES = '''
 - name: insert simple key, value
   yedit:
     src: somefile.yml
-    key: a#b#c
+    key: a.b.c
     value: d
     state: present
 # Results:
@@ -165,9 +165,9 @@ EXAMPLES = '''
   yedit:
     src: somefile.yml
     edits:
-    - key: a#b#c
+    - key: a.b.c
       value: d
-    - key: a#b#c#d
+    - key: a.b.c.d
       value: e
     state: present
 # Results:
