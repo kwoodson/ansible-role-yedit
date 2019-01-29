@@ -943,7 +943,7 @@ def main():
         key_error = False
         edit_error = False
 
-        if module.params['key'] in [None]:
+        if module.params['key'] is None:
             key_error = True
 
         if module.params['edits'] in [None, []]:
