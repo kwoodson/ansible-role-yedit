@@ -44,7 +44,7 @@ Sometimes it is necesarry to config manage .yml files.
   - name: manage yaml files
     yedit:
       src: /tmp/test.yaml
-      key: a#b#c
+      key: a.b.c
       value:
         d:
           e:
@@ -55,7 +55,7 @@ Sometimes it is necesarry to config manage .yml files.
     yedit:
       src: /tmp/test.yaml
       state: list
-      key: a#b#c#d#e#f
+      key: a.b.c.d.e.f
     register: yeditout
   - debug: var=yeditout
 ----
