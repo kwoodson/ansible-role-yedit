@@ -1,0 +1,33 @@
+---
+language: python
+cache:
+  - pip
+  - directories:
+      - $HOME/.cache
+dist: xenial
+os:
+  - linux
+before_install:
+  - which tox >/dev/null || if [ -z ${VIRTUAL_ENV+x} ]; then python -m pip install --user tox tox-pyenv wheel ; else python -m pip install tox tox-pyenv wheel twine; fi
+jobs:
+  include:
+    - script:
+        - python -m tox
+      env: TOXENV=lint
+      python: "2.7"
+    - script: python -m tox
+      python: "2.7"
+      env: TOXENV=py27
+    - script: python -m tox
+      python: "3.5"
+      env: TOXENV=py35
+    - script: python -m tox
+      python: "3.6"
+      env: TOXENV=py36 PYTHON='3.6' PYENV_VERSION='system'
+    - script: python -m tox
+      python: "3.7"
+      env: TOXENV=py37 PYTHON='3.7'
+env:
+  global:
+    - ANSIBLE_VERBOSITY=2
+    - PIP_DISABLE_PIP_VERSION_CHECK=1

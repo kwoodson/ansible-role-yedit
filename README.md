@@ -22,7 +22,7 @@ As `yedit` is not a listed Ansible module, have to install it manually by placin
 Alternatively you can install via Ansible Galaxy:
 
     $ ansible-galaxy install kwoodson.yedit
-    
+
 If you do this, you should also add a `requirements.yml` so other users of your playbook know what dependencies to install:
 
 ```yaml
@@ -38,7 +38,7 @@ Sometimes it is necesarry to config manage .yml files.
 ----
 - hosts: localhost
   gather_facts: no
-  roles: 
+  roles:
   - roles/lib_yaml_editor
   tasks:
   - name: manage yaml files

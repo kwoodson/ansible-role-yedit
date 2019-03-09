@@ -1,0 +1,10 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 180
+    # matching implicit limit in ansible-lint
+  comments:
+    require-starting-space: true
+    ignore-shebangs: true

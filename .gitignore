@@ -1,2 +1,4 @@
+.tox
+*.py[co]
 # VIM tmp files
 *.swp

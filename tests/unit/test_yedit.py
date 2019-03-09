@@ -33,18 +33,18 @@ class YeditTest(unittest.TestCase):
     filename = 'yedit_test.yml'
 
     def setUp(self):
-        ''' setup method will create a file and set to known configuration '''
+        '''setup method will create a file and set to known configuration'''
         yed = Yedit(YeditTest.filename)
         yed.yaml_dict = YeditTest.data
         yed.write()
 
     def test_load(self):
-        ''' Testing a get '''
+        '''Testing a get'''
         yed = Yedit('yedit_test.yml')
         self.assertEqual(yed.yaml_dict, self.data)
 
     def test_write(self):
-        ''' Testing a simple write '''
+        '''Testing a simple write'''
         yed = Yedit('yedit_test.yml')
         yed.put('key1', 1)
         yed.write()
@@ -261,13 +261,16 @@ class YeditTest(unittest.TestCase):
         self.assertTrue({'a': {'b': {'d': 2}}} == yed.yaml_dict)
 
     def test_accessing_path_with_unexpected_objects(self):
-        '''test providing source path objects that differ from current object state'''
+        '''test providing source path objects that differ from current
+        object state'''
         yed = Yedit(content={'a': {'b': {'c': ['d', 'e']}}})
         with self.assertRaises(YeditException):
             yed.put('a.b.c.d', 'x')
 
     def test_creating_new_objects_with_embedded_list(self):
-        '''test creating new objects with an embedded list in the creation path'''
+        '''test creating new objects with an embedded list in the
+        creation path'''
+
         yed = Yedit(content={'a': {'b': 12}})
         with self.assertRaises(YeditException):
             yed.put('new.stuff[0].here', 'value')
@@ -307,7 +310,8 @@ class YeditTest(unittest.TestCase):
         content = [{'a': {'b': [{'c': 3}]}}]
         yed = Yedit(content=content)
         yed.put("[1]", [{"next": "something"}])
-        self.assertTrue(yed.yaml_dict, [{'a': {'b': [{'c': 3}]}}, {"next": "something"}])
+        self.assertTrue(yed.yaml_dict,
+                        [{'a': {'b': [{'c': 3}]}}, {"next": "something"}])
 
     def test_parse_value_string_true(self):
         '''test parse_value'''
