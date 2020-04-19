@@ -905,6 +905,10 @@ class Yedit(object):
             return {'changed': False, 'result': yamlfile.yaml_dict, 'state': state}
         return {'failed': True, 'msg': 'Unkown state passed'}
 
+def json_roundtrip_clean(js):
+    ''' Clean-up any non-string keys from a Python object, to ensure it can be serialized as JSON '''
+    cleaned_json = json.dumps(js, skipkeys=True)
+    return json.loads(cleaned_json)
 
 # pylint: disable=too-many-branches
 def main():
@@ -958,7 +962,7 @@ def main():
         if key_error and edit_error:
             return module.fail_json(failed=True, msg='Empty value for parameter key not allowed.')
 
-    rval = Yedit.run_ansible(module.params)
+    rval = json_roundtrip_clean(Yedit.run_ansible(module.params))
     if 'failed' in rval and rval['failed']:
         return module.fail_json(**rval)
 
