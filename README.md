@@ -14,12 +14,7 @@ I didn't see a good method of editing yaml files and config managing them throug
 
 == Install
 
-As `yedit` is not a listed Ansible module, have to install it manually by placing `lib_yaml_editor` directory in a location recognized by Ansible. For details, see http://docs.ansible.com/ansible/latest/index.html[Ansible documentation]:
-
-* http://docs.ansible.com/ansible/devel/playbooks_reuse_roles.html#embedding-modules-and-plugins-in-roles[Embedding Modules and Plugins In Roles]
-* http://docs.ansible.com/ansible/latest/intro_configuration.html#module-utils[module_utils]
-
-Alternatively you can install via Ansible Galaxy:
+You can install via Ansible Galaxy:
 
     $ ansible-galaxy install kwoodson.yedit
     
@@ -30,7 +25,14 @@ If you do this, you should also add a `requirements.yml` so other users of your 
 - src: kwoodson.yedit
 ```
 
+You can then reference it in a play by importing it before use:
 
+```yaml
+  roles:
+    - kwoodson.yedit
+    - role-that-uses-yedit
+```
+    
 == Examples
 
 Sometimes it is necesarry to config manage .yml files.
@@ -39,7 +41,7 @@ Sometimes it is necesarry to config manage .yml files.
 - hosts: localhost
   gather_facts: no
   roles: 
-  - roles/lib_yaml_editor
+  - kwoodson.yedit
   tasks:
   - name: manage yaml files
     yedit:
@@ -59,6 +61,13 @@ Sometimes it is necesarry to config manage .yml files.
     register: yeditout
   - debug: var=yeditout
 ----
+
+== Development
+
+As this is a role, just copy it into any roles directory recognized by Ansible. For details, see http://docs.ansible.com/ansible/latest/index.html[Ansible documentation]:
+
+* http://docs.ansible.com/ansible/devel/playbooks_reuse_roles.html#embedding-modules-and-plugins-in-roles[Embedding Modules and Plugins In Roles]
+* http://docs.ansible.com/ansible/latest/intro_configuration.html#module-utils[module_utils]
 
 == Documentation
 
