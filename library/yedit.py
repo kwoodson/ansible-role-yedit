@@ -418,7 +418,10 @@ class Yedit(object):
             fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
             yfd.flush()  # flush internal buffers
-            os.fsync(yfd.fileno())  # ensure buffer content reached disk
+            try:
+                os.fsync(yfd.fileno())  # ensure buffer content reached disk
+            except:
+                pass
             fcntl.flock(yfd, fcntl.LOCK_UN)
 
         os.rename(tmp_filename, filename)
@@ -429,6 +432,8 @@ class Yedit(object):
         try:
             dfd = os.open(os.path.join(os.path.realpath('.'), os.path.dirname(filename)), os.O_DIRECTORY)
             os.fsync(dfd)
+        except:
+            pass
         finally:
             if dfd:
                 os.close(dfd)
