@@ -35,7 +35,7 @@ You can then reference it in a play by importing it before use:
     
 == Examples
 
-Sometimes it is necesarry to config manage .yml files.
+Sometimes it is necessary to config manage .yml files.
 [source,yaml]
 ----
 - hosts: localhost
