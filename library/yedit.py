@@ -946,6 +946,10 @@ def json_roundtrip_clean(js):
 def main():
     ''' ansible oc module for secrets '''
 
+    # Noop validator, as the type can be flexible.
+    def validate_value(value, *args):
+        return value
+
     module = AnsibleModule(
         argument_spec=dict(
             state=dict(default='present', type='str',
@@ -955,7 +959,7 @@ def main():
             content=dict(default=None),
             content_type=dict(default='yaml', choices=['yaml', 'json']),
             key=dict(default='', type='str'),
-            value=dict(),
+            value=dict(type=validate_value),
             value_type=dict(default='', type='str'),
             update=dict(default=False, type='bool'),
             append=dict(default=False, type='bool'),
