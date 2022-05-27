@@ -462,10 +462,8 @@ class Yedit(object):
         # Try to use RoundTripDumper if supported.
         if self.content_type == 'yaml':
             try:
-                #Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yyaml.RoundTripDumper))
                 yaml.dump(self.yaml_dict, pathlib.Path(self.filename))
             except AttributeError:
-                #Yedit._write(self.filename, syaml.dump(self.yaml_dict, default_flow_style=False))
                 syaml.default_flow_style=False
                 syaml.dump(self.yaml_dict, pathlib.Path(self.filename))
         elif self.content_type == 'json':
@@ -537,7 +535,7 @@ class Yedit(object):
                 self.yaml_dict = json.loads(contents)
         except yyaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. {0} {1}'.format(err,yaml.allow_duplicate_keys))
+            raise YeditException('Problem with loading yaml file. {0}'.format(err))
 
         return self.yaml_dict
 
