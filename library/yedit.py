@@ -27,6 +27,13 @@ options:
     default: present
     choices: ["present", "absent", "list"]
     aliases: []
+  allow_duplicate_keys:
+    description:
+    - Allow duplicate keys in yaml file.
+    required: false
+    default: true
+    type: bool
+    aliases: []
   debug:
     description:
     - Turn on debug information.
@@ -193,9 +200,12 @@ import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
 import time  # noqa: F401
+import pathlib
 
 try:
-    import ruamel.yaml as yaml  # noqa: F401
+    import ruamel.yaml as yyaml  # noqa: F401
+    yaml = yyaml.YAML()
+    syaml = yyaml.YAML(typ='safe')
 except ImportError:
     import yaml  # noqa: F401
 
@@ -221,6 +231,7 @@ class Yedit(object):
                  content_type='yaml',
                  separator='.',
                  backup_ext=".{0}".format(time.strftime("%Y%m%dT%H%M%S")),
+                 allow_duplicate_keys=True,
                  backup=False):
         self.content = content
         self._separator = separator
@@ -229,6 +240,7 @@ class Yedit(object):
         self.content_type = content_type
         self.backup = backup
         self.backup_ext = backup_ext
+        self.allow_duplicate_keys = allow_duplicate_keys
         self.load(content_type=self.content_type)
         if self.__yaml_dict is None:
             self.__yaml_dict = {}
@@ -450,9 +462,12 @@ class Yedit(object):
         # Try to use RoundTripDumper if supported.
         if self.content_type == 'yaml':
             try:
-                Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yaml.RoundTripDumper))
+                #Yedit._write(self.filename, yaml.dump(self.yaml_dict, Dumper=yyaml.RoundTripDumper))
+                yaml.dump(self.yaml_dict, pathlib.Path(self.filename))
             except AttributeError:
-                Yedit._write(self.filename, yaml.safe_dump(self.yaml_dict, default_flow_style=False))
+                #Yedit._write(self.filename, syaml.dump(self.yaml_dict, default_flow_style=False))
+                syaml.default_flow_style=False
+                syaml.dump(self.yaml_dict, pathlib.Path(self.filename))
         elif self.content_type == 'json':
             Yedit._write(self.filename, json.dumps(self.yaml_dict, indent=4, sort_keys=True))
         else:
@@ -482,6 +497,7 @@ class Yedit(object):
 
     def load(self, content_type='yaml'):
         ''' return yaml file '''
+        yaml.allow_duplicate_keys = self.allow_duplicate_keys
         contents = self.read()
 
         if not contents and not self.content:
@@ -505,21 +521,23 @@ class Yedit(object):
 
                 # Try to use RoundTripLoader if supported.
                 try:
-                    self.yaml_dict = yaml.load(contents, yaml.RoundTripLoader)
+                    yaml.preserve_quotes = True
+                    self.yaml_dict = yaml.load(contents)
                 except AttributeError:
-                    self.yaml_dict = yaml.safe_load(contents)
+                    self.yaml_dict = syaml.load(contents)
 
                 # Try to set format attributes if supported
                 try:
+                    print("d")
                     self.yaml_dict.fa.set_block_style()
                 except AttributeError:
                     pass
 
             elif content_type == 'json' and contents:
                 self.yaml_dict = json.loads(contents)
-        except yaml.YAMLError as err:
+        except yyaml.YAMLError as err:
             # Error loading yaml or json
-            raise YeditException('Problem with loading yaml file. {0}'.format(err))
+            raise YeditException('Problem with loading yaml file. {0} {1}'.format(err,yaml.allow_duplicate_keys))
 
         return self.yaml_dict
 
@@ -766,7 +784,7 @@ class Yedit(object):
 
         curr_value = invalue
         if val_type == 'yaml':
-            curr_value = yaml.safe_load(str(invalue))
+            curr_value = syaml.load(str(invalue))
         elif val_type == 'json':
             curr_value = json.loads(invalue)
 
@@ -794,7 +812,7 @@ class Yedit(object):
         # If vtype is not str then go ahead and attempt to yaml load it.
         elif isinstance(inc_value, str) and 'str' not in vtype:
             try:
-                inc_value = yaml.safe_load(inc_value)
+                inc_value = syaml.load(inc_value)
             except Exception:
                 raise YeditException('Could not determine type of incoming value. ' +
                                      'value=[{0}] vtype=[{1}]'.format(type(inc_value), vtype))
@@ -840,6 +858,7 @@ class Yedit(object):
                          backup=params['backup'],
                          content_type=params['content_type'],
                          backup_ext=params['backup_ext'],
+                         allow_duplicate_keys=params['allow_duplicate_keys'],
                          separator=params['separator'])
 
         state = params['state']
@@ -950,6 +969,7 @@ def main():
         argument_spec=dict(
             state=dict(default='present', type='str',
                        choices=['present', 'absent', 'list']),
+            allow_duplicate_keys=dict(default=True, type='bool'),
             debug=dict(default=False, type='bool'),
             src=dict(default=None, type='str'),
             content=dict(default=None),
