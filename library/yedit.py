@@ -192,6 +192,7 @@ import json   # noqa: F401
 import os  # noqa: F401
 import re  # noqa: F401
 import shutil  # noqa: F401
+import tempfile  # noqa: F401
 import time  # noqa: F401
 
 try:
@@ -412,9 +413,9 @@ class Yedit(object):
     def _write(filename, contents):
         ''' Actually write the file contents to disk. This helps with mocking. '''
 
-        tmp_filename = filename + '.yedit'
+        tmp_filename = tempfile.NamedTemporaryFile(mode='w', delete=False)
 
-        with open(tmp_filename, 'w') as yfd:
+        with open(tmp_filename.name, 'w') as yfd:
             fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
             yfd.flush()  # flush internal buffers
@@ -423,8 +424,9 @@ class Yedit(object):
             except:
                 pass
             fcntl.flock(yfd, fcntl.LOCK_UN)
+        tmp_filename.close()
 
-        os.rename(tmp_filename, filename)
+        shutil.move(tmp_filename.name, filename)
         # While the rename is atomic, we also need to ensure, that the updated
         # directory entry has reached the disk too.
         # NOTE: this might fail on Windows systems.
