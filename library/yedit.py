@@ -414,7 +414,9 @@ class Yedit(object):
 
         tmp_filename = filename + '.yedit'
 
-        with open(tmp_filename, 'w') as yfd:
+        original_mode = os.stat(filename).st_mode
+        fd = os.open(tmp_filename, flags=(os.O_WRONLY | os.O_CREAT | os.O_TRUNC), mode=original_mode)
+        with open(fd, 'w') as yfd:
             fcntl.flock(yfd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             yfd.write(contents)
             yfd.flush()  # flush internal buffers
