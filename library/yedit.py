@@ -662,8 +662,10 @@ class Yedit(object):
                 raise YeditException('Cannot replace key, value entry in dict with non-dict type. ' +
                                      'value=[{0}] type=[{1}]'.format(value, type(value)))
 
+            tmp_copy = copy.deepcopy(entry)
             entry.update(value)
-            return (True, self.yaml_dict)
+            changed = entry != tmp_copy
+            return (changed, self.yaml_dict)
 
         elif isinstance(entry, list):
             # AUDIT:maybe-no-member makes sense due to fuzzy types
