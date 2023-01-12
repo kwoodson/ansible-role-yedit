@@ -1,18 +1,21 @@
 ---
 galaxy_info:
   author: Kenny Woodson
+  namespace: rheinwerk
+  role_name: yedit
   description: A yaml/json editing module for idempotent edits.
   company: Red Hat, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 1.8
+  min_ansible_version: 2.9.0
   platforms:
-  - name: EL
-    versions:
-    - 7
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
   galaxy_tags:
-  - json
-  - yaml
-  - edit
-  - replace
-  - sed
+    - json
+    - yaml
+    - edit
+    - replace
+    - sed
 dependencies: []
