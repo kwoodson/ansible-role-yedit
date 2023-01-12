@@ -1,5 +1,5 @@
 ---
-name: Molecule
+name: CI
 on:
   workflow_dispatch:
   pull_request:
@@ -10,7 +10,7 @@ on:
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       container_supported: ${{ steps.get_min_ansible_container_version.outputs.result }}
     steps:
@@ -34,7 +34,7 @@ jobs:
 
   molecule:
     name: Molecule for Ansible ${{ matrix.ansible_version }} / ${{ matrix.distro }} / Python ${{ matrix.python_version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: ${{ matrix.experimental }}
     needs: lint
     if: needs.lint.outputs.container_supported != 'X'
@@ -72,3 +72,19 @@ jobs:
           ansible_version: ${{ matrix.ansible_version }}
           jinja2_version: ${{ matrix.jinja2_version }}
           python_version: ${{ matrix.python_version }}
+
+  release:
+    name: Release
+    runs-on: ubuntu-22.04
+    needs: molecule
+    # https://github.com/actions/runner/issues/491#issuecomment-850884422
+    if: |
+      always() &&
+      startsWith(github.event.ref, 'refs/tags/v') &&
+      (needs.molecule.result == 'success' || needs.molecule.result == 'skipped')
+    steps:
+      # Ansible ist bereits im Ubuntu Image enthalten, wir brauchen keine spezielle Version für den Galaxy Import: https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+      # AnsibleLint config wird anscheinend ignoriert: https://github.com/ansible/galaxy/issues/2868
+      - name: Trigger import of Role at Ansible Galaxy
+        run: |
+          ansible-galaxy role import --api-key ${{ secrets.GALAXY_API_KEY }} $(echo $GITHUB_REPOSITORY | cut -d/ -f1) $(echo $GITHUB_REPOSITORY | cut -d/ -f2)
