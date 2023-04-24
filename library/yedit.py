@@ -902,6 +902,8 @@ class Yedit(object):
             if params['value'] is not None:
                 _edit['value'] = params['value']
                 _edit['value_type'] = params['value_type']
+                if _edit['value'].startswith('0'):
+                    _edit['value_type'] = 'str'
                 _edit['key'] = params['key']
 
                 if params['update']:
