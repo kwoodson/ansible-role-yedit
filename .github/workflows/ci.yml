@@ -45,13 +45,17 @@ jobs:
           - distro: ubuntu-20.04
             test_type: unit
             ansible_version: '>=2.9, <2.10'
+            ansible_compat_version: '<3'
             jinja2_version: '<3.1'
+            molecule_version: '<5'
             python_version: '3.8'
             experimental: false
           - distro: ubuntu-20.04
             test_type: unit
             ansible_version: '>=2.10, <2.11'
+            ansible_compat_version: '<3'
             jinja2_version: '<3.1'
+            molecule_version: '<5'
             python_version: '3.8'
             experimental: false
           - distro: ubuntu-20.04
@@ -70,7 +74,9 @@ jobs:
           distro: ${{ matrix.distro }}
           test_type: ${{ matrix.test_type }}
           ansible_version: ${{ matrix.ansible_version }}
+          ansible_compat_version: ${{ matrix.ansible_compat_version }}
           jinja2_version: ${{ matrix.jinja2_version }}
+          molecule_version: ${{ matrix.molecule_version }}
           python_version: ${{ matrix.python_version }}
 
   release:
